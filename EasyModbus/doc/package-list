@@ -1,0 +1,6 @@
+ModbusRTU
+de.re.easymodbus.exceptions
+de.re.easymodbus.modbusclient
+de.re.easymodbus.modbusclient.gui
+de.re.easymodbus.server
+de.re.easymodbus.server.gui

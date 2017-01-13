@@ -1,0 +1,9 @@
+/ClientConnectionThread.class
+/ICoilsChangedDelegator.class
+/IHoldingRegistersChangedDelegator.class
+/ILogDataChangedDelegator.class
+/INumberOfConnectedClientsChangedDelegator.class
+/ListenerThread.class
+/ModbusProtocoll.class
+/ModbusServer.class
+/ProcessReceivedDataThread.class
