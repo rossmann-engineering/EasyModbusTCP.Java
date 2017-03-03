@@ -169,10 +169,53 @@ public class ModbusClient
                             };
         return ByteBuffer.wrap(floatBytes).getFloat();
     }  
+    
+    /**
+    * Convert two 16 Bit Registers to 64 Bit double value  Reg0: Low Word.....Reg3: High Word
+    * @param        registers   16 Bit Registers
+    * @return       64 bit double value
+    */
+    public static double ConvertRegistersToDoublePrecisionFloat(int[] registers) throws IllegalArgumentException
+    {
+    	if (registers.length != 4)
+    		throw new IllegalArgumentException("Input Array length invalid");
+    	byte[] highRegisterBytes = toByteArray(registers[3]);
+    	byte[] highLowRegisterBytes = toByteArray(registers[2]); 
+    	byte[] lowHighRegisterBytes = toByteArray(registers[1]);
+    	byte[] lowRegisterBytes = toByteArray(registers[0]);
+    	byte[] doubleBytes = {
+                            highRegisterBytes[1],
+                            highRegisterBytes[0],
+                            highLowRegisterBytes[1],
+                            highLowRegisterBytes[0],
+                            lowHighRegisterBytes[1],
+                            lowHighRegisterBytes[0],
+                            lowRegisterBytes[1],
+                            lowRegisterBytes[0]
+                        };
+    	return ByteBuffer.wrap(doubleBytes).getDouble();
+    }  
+    
+    /**
+    * Convert two 16 Bit Registers to 64 Bit double value  Order "LowHigh": Reg0: Low Word.....Reg3: High Word, "HighLow": Reg0: High Word.....Reg3: Low Word
+    * @param        registers   16 Bit Registers
+    * @param        registerOrder    High Register first or low Register first 
+    * @return       64 bit double value
+    */
+public static double ConvertRegistersToDoublePrecisionFloat(int[] registers, RegisterOrder registerOrder) throws IllegalArgumentException
+{
+    if (registers.length != 4)
+        throw new IllegalArgumentException("Input Array length invalid");
+    int[] swappedRegisters = { registers[0], registers[1], registers[2], registers[3] };
+    if (registerOrder == RegisterOrder.HighLow)
+    	swappedRegisters = new int[] { registers[3], registers[2], registers[1], registers[0] };
+    return ConvertRegistersToDoublePrecisionFloat(swappedRegisters);
+}
+   
         /**
-        * Convert two 16 Bit Registers to 32 Bit real value
+        * Convert two 16 Bit Registers to 32 Bit real value 
         * @param        registers   16 Bit Registers
-        * @param        registerOrder    High Register first or low Register first
+        * @param        registerOrder    High Register first or low Register first 
         * @return       32 bit real value
         */
     public static float ConvertRegistersToFloat(int[] registers, RegisterOrder registerOrder) throws IllegalArgumentException
@@ -182,6 +225,48 @@ public class ModbusClient
             swappedRegisters = new int[] {registers[1],registers[0]};
         return ConvertRegistersToFloat(swappedRegisters);
     }
+   
+    
+    /**
+    * Convert four 16 Bit Registers to 64 Bit long value Reg0: Low Word.....Reg3: High Word
+    * @param        registers   16 Bit Registers
+    * @return       64 bit value
+    */
+public static long ConvertRegistersToLong(int[] registers) throws IllegalArgumentException
+{
+    if (registers.length != 4)
+        throw new IllegalArgumentException("Input Array length invalid");
+    byte[] highRegisterBytes = toByteArray(registers[3]);
+    byte[] highLowRegisterBytes = toByteArray(registers[2]); 
+    byte[] lowHighRegisterBytes = toByteArray(registers[1]);
+    byte[] lowRegisterBytes = toByteArray(registers[0]);
+    byte[] longBytes = {
+                            highRegisterBytes[1],
+                            highRegisterBytes[0],
+                            highLowRegisterBytes[1],
+                            highLowRegisterBytes[0],
+                            lowHighRegisterBytes[1],
+                            lowHighRegisterBytes[0],
+                            lowRegisterBytes[1],
+                            lowRegisterBytes[0]
+                        };
+    return ByteBuffer.wrap(longBytes).getLong();
+}  
+
+/**
+* Convert four 16 Bit Registers to 64 Bit long value Register Order "LowHigh": Reg0: Low Word.....Reg3: High Word, "HighLow": Reg0: High Word.....Reg3: Low Word
+* @param        registers   16 Bit Registers
+* @return       64 bit value
+*/
+public static long ConvertRegistersToLong(int[] registers, RegisterOrder registerOrder) throws IllegalArgumentException
+{
+    if (registers.length != 4)
+        throw new IllegalArgumentException("Input Array length invalid");
+    int[] swappedRegisters = { registers[0], registers[1], registers[2], registers[3] };
+    if (registerOrder == RegisterOrder.HighLow)
+    	swappedRegisters = new int[] { registers[3], registers[2], registers[1], registers[0] };
+    return ConvertRegistersToLong(swappedRegisters);
+}
     
         /**
         * Convert two 16 Bit Registers to 32 Bit long value
