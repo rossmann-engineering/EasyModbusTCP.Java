@@ -55,12 +55,12 @@ public class ModbusServer extends Thread
     
     public ModbusServer() 
     {
-		System.out.println("EasyModbus Server Library");
+/*		System.out.println("EasyModbus Server Library");
 		System.out.println("Copyright (c) Stefan Rossmann Engineering Solutions");
 		System.out.println("www.rossmann-engineering.de");
 		System.out.println("");
 		System.out.println("Creative commons license");
-		System.out.println("Attribution-NonCommercial-NoDerivatives 4.0 International (CC BY-NC-ND 4.0)");
+		System.out.println("Attribution-NonCommercial-NoDerivatives 4.0 International (CC BY-NC-ND 4.0)");*/
 	}
     
     @SuppressWarnings("deprecation")

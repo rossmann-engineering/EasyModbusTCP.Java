@@ -25,7 +25,9 @@ public class ModbusRTU
      public static void main(String args[]) throws IOException 
      {
     	 boolean success = false;
-         ModbusClient modbusClient = new ModbusClient();
+         ModbusClient modbusClient = new ModbusClient("192.168.178.66", 502);
+         System.out.println(modbusClient.Available(500));
+         /*
          while (success == false)
          {
         	 try
@@ -53,7 +55,8 @@ public class ModbusRTU
         	 {
         		 modbusClient.Disconnect();
         	 }
+        	 
          }
-         
+         */
      }
 }

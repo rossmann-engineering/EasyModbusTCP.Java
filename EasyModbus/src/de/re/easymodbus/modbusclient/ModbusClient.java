@@ -52,27 +52,33 @@ public class ModbusClient
 	private List<ReceiveDataChangedListener> receiveDataChangedListener = new ArrayList<ReceiveDataChangedListener>();
 	private List<SendDataChangedListener> sendDataChangedListener = new ArrayList<SendDataChangedListener>();
 	private SerialPort serialPort;
+	private String mqttRootTopic = "easymodbusclient";
+	private String mqttUserName;
+	private String mqttPassword;
+    private int mqttBrokerPort = 1883;
+    private boolean mqttPushOnChange = true;
+    private boolean mqttRetainMessages = false;
 	
 	public ModbusClient(String ipAddress, int port)
 	{
-		System.out.println("EasyModbus Client Library");
+/*		System.out.println("EasyModbus Client Library");
 		System.out.println("Copyright (c) Stefan Rossmann Engineering Solutions");
 		System.out.println("www.rossmann-engineering.de");
 		System.out.println("");
 		System.out.println("Creative commons license");
-		System.out.println("Attribution-NonCommercial-NoDerivatives 4.0 International (CC BY-NC-ND 4.0)");
+		System.out.println("Attribution-NonCommercial-NoDerivatives 4.0 International (CC BY-NC-ND 4.0)");*/
 		this.ipAddress = ipAddress;
 		this.port = port;
 	}
 	
 	public ModbusClient()
 	{
-		System.out.println("EasyModbus Client Library");
+/*		System.out.println("EasyModbus Client Library");
 		System.out.println("Copyright (c) Stefan Rossmann Engineering Solutions");
 		System.out.println("www.rossmann-engineering.de");
 		System.out.println("");
 		System.out.println("Creative commons license");
-		System.out.println("Attribution-NonCommercial-NoDerivatives 4.0 International (CC BY-NC-ND 4.0)");
+		System.out.println("Attribution-NonCommercial-NoDerivatives 4.0 International (CC BY-NC-ND 4.0)");*/
 	}
 	
         /**
@@ -172,10 +178,10 @@ public class ModbusClient
     
     /**
     * Convert two 16 Bit Registers to 64 Bit double value  Reg0: Low Word.....Reg3: High Word
-    * @param        registers   16 Bit Registers
+    * @param        registers  16 Bit Registers
     * @return       64 bit double value
     */
-    public static double ConvertRegistersToDoublePrecisionFloat(int[] registers) throws IllegalArgumentException
+    public static double ConvertRegistersToDouble(int[] registers) throws IllegalArgumentException
     {
     	if (registers.length != 4)
     		throw new IllegalArgumentException("Input Array length invalid");
@@ -199,17 +205,17 @@ public class ModbusClient
     /**
     * Convert two 16 Bit Registers to 64 Bit double value  Order "LowHigh": Reg0: Low Word.....Reg3: High Word, "HighLow": Reg0: High Word.....Reg3: Low Word
     * @param        registers   16 Bit Registers
-    * @param        registerOrder    High Register first or low Register first 
+    * @param        registerOrder High Register first or low Register first 
     * @return       64 bit double value
     */
-    public static double ConvertRegistersToDoublePrecisionFloat(int[] registers, RegisterOrder registerOrder) throws IllegalArgumentException
+    public static double ConvertRegistersToDouble(int[] registers, RegisterOrder registerOrder) throws IllegalArgumentException
     {
     	if (registers.length != 4)
     		throw new IllegalArgumentException("Input Array length invalid");
     	int[] swappedRegisters = { registers[0], registers[1], registers[2], registers[3] };
     	if (registerOrder == RegisterOrder.HighLow)
     		swappedRegisters = new int[] { registers[3], registers[2], registers[1], registers[0] };
-    	return ConvertRegistersToDoublePrecisionFloat(swappedRegisters);
+    	return ConvertRegistersToDouble(swappedRegisters);
     }
    
         /**
@@ -273,7 +279,7 @@ public class ModbusClient
         * @param        registers   16 Bit Registers
         * @return       32 bit value
         */
-    public static int ConvertRegistersToDouble(int[] registers) throws IllegalArgumentException
+    public static int ConvertRegistersToInt(int[] registers) throws IllegalArgumentException
     {
         if (registers.length != 2)
             throw new IllegalArgumentException("Input Array length invalid");
@@ -296,12 +302,12 @@ public class ModbusClient
         * @param        registerOrder    High Register first or low Register first
         * @return       32 bit value
         */
-    public static int ConvertRegistersToDouble(int[] registers, RegisterOrder registerOrder) throws IllegalArgumentException
+    public static int ConvertRegistersToInt(int[] registers, RegisterOrder registerOrder) throws IllegalArgumentException
     {
         int[] swappedRegisters = { registers[0], registers[1] };
         if (registerOrder == RegisterOrder.HighLow)
             swappedRegisters = new int[] { registers[1], registers[0] };
-        return ConvertRegistersToDouble(swappedRegisters);
+        return ConvertRegistersToInt(swappedRegisters);
     }
     
         /**
@@ -309,7 +315,7 @@ public class ModbusClient
         * @param        floatValue      real to be converted
         * @return       16 Bit Register values
         */
-    public static int[] ConvertFloatToTwoRegisters(float floatValue)
+    public static int[] ConvertFloatToRegisters(float floatValue)
     {
         byte[] floatBytes = toByteArray(floatValue);
         byte[] highRegisterBytes = 
@@ -340,9 +346,9 @@ public class ModbusClient
         * @param        registerOrder    High Register first or low Register first
         * @return       16 Bit Register values
         */
-    public static int[] ConvertFloatToTwoRegisters(float floatValue, RegisterOrder registerOrder)
+    public static int[] ConvertFloatToRegisters(float floatValue, RegisterOrder registerOrder)
     {
-        int[] registerValues = ConvertFloatToTwoRegisters(floatValue);
+        int[] registerValues = ConvertFloatToRegisters(floatValue);
         int[] returnValue = registerValues;
         if (registerOrder == RegisterOrder.HighLow)
             returnValue = new int[] { registerValues[1], registerValues[0] };
@@ -351,12 +357,12 @@ public class ModbusClient
     
         /**
         * Convert 32 Bit Value to two 16 Bit Value to send as Modbus Registers
-        * @param        doubleValue      Value to be converted
+        * @param        intValue      Value to be converted
         * @return       16 Bit Register values
         */
-    public static int[] ConvertDoubleToTwoRegisters(int doubleValue)
+    public static int[] ConvertIntToRegisters(int intValue)
     {
-        byte[] doubleBytes = toByteArrayDouble(doubleValue);
+        byte[] doubleBytes = toByteArrayInt(intValue);
         byte[] highRegisterBytes = 
         {
         		0,0,
@@ -381,18 +387,139 @@ public class ModbusClient
     
        	/**
         * Convert 32 Bit Value to two 16 Bit Value to send as Modbus Registers
-        * @param        doubleValue      Value to be converted
+        * @param        intValue      Value to be converted
         * @param        registerOrder    High Register first or low Register first
         * @return       16 Bit Register values
         */
-    public static int[] ConvertDoubleToTwoRegisters(int doubleValue, RegisterOrder registerOrder)
+    public static int[] ConvertIntToRegisters(int intValue, RegisterOrder registerOrder)
     {
-        int[] registerValues = ConvertFloatToTwoRegisters(doubleValue);
+        int[] registerValues = ConvertIntToRegisters(intValue);
         int[] returnValue = registerValues;
         if (registerOrder == RegisterOrder.HighLow)
             returnValue = new int[] { registerValues[1], registerValues[0] };
         return returnValue;
     }
+ 
+    /**
+     * Convert 64 Bit Value to four 16 Bit Value to send as Modbus Registers
+     * @param        longValue      Value to be converted
+     * @return       16 Bit Register values
+     */
+	 public static int[] ConvertLongToRegisters(long longValue)
+	 {
+	     byte[] doubleBytes = toByteArrayLong(longValue);
+	     byte[] highhighRegisterBytes = 
+	     {
+	     		0,0,
+	         doubleBytes[0],
+	         doubleBytes[1],
+	
+	     };
+	     byte[] highlowRegisterBytes = 
+	     {
+	         0,0,
+	         doubleBytes[2],
+	         doubleBytes[3],
+	
+	     };
+	     byte[] lowHighRegisterBytes = 
+	     {
+	         0,0,
+	         doubleBytes[4],
+	         doubleBytes[5],
+	     };    
+	     byte[] lowlowRegisterBytes = 
+	     {
+	         0,0,
+	         doubleBytes[6],
+	         doubleBytes[7],
+	
+	     };
+	     int[] returnValue =
+	     {
+	     		ByteBuffer.wrap(lowlowRegisterBytes).getInt(),
+	     		ByteBuffer.wrap(lowHighRegisterBytes).getInt(),
+	     		ByteBuffer.wrap(highlowRegisterBytes).getInt(),
+	     		ByteBuffer.wrap(highhighRegisterBytes).getInt(),
+	     };
+	     return returnValue;
+	 }
+
+    	/**
+     * Convert 64 Bit Value to two 16 Bit Value to send as Modbus Registers
+     * @param        longValue      Value to be converted
+     * @param        registerOrder    High Register first or low Register first
+     * @return       16 Bit Register values
+     */
+	 public static int[] ConvertLongToRegisters(int longValue, RegisterOrder registerOrder)
+	 {
+	     int[] registerValues = ConvertLongToRegisters(longValue);
+	     int[] returnValue = registerValues;
+	     if (registerOrder == RegisterOrder.HighLow)
+	         returnValue = new int[] { registerValues[3], registerValues[2], registerValues[1], registerValues[0]};
+	     return returnValue;
+	 }
+	 
+	    /**
+	     * Convert 64 Bit Value to four 16 Bit Value to send as Modbus Registers
+	     * @param        doubleValue      Value to be converted
+	     * @return       16 Bit Register values
+	     */
+		 public static int[] ConvertDoubleToRegisters(double doubleValue)
+		 {
+		     byte[] doubleBytes = toByteArrayDouble(doubleValue);
+		     byte[] highhighRegisterBytes = 
+		     {
+		     		0,0,
+		         doubleBytes[0],
+		         doubleBytes[1],
+		
+		     };
+		     byte[] highlowRegisterBytes = 
+		     {
+		         0,0,
+		         doubleBytes[2],
+		         doubleBytes[3],
+		
+		     };
+		     byte[] lowHighRegisterBytes = 
+		     {
+		         0,0,
+		         doubleBytes[4],
+		         doubleBytes[5],
+		     };    
+		     byte[] lowlowRegisterBytes = 
+		     {
+		         0,0,
+		         doubleBytes[6],
+		         doubleBytes[7],
+		
+		     };
+		     int[] returnValue =
+		     {
+		     		ByteBuffer.wrap(lowlowRegisterBytes).getInt(),
+		     		ByteBuffer.wrap(lowHighRegisterBytes).getInt(),
+		     		ByteBuffer.wrap(highlowRegisterBytes).getInt(),
+		     		ByteBuffer.wrap(highhighRegisterBytes).getInt(),
+		     };
+		     return returnValue;
+		 }
+		 
+		
+    	/**
+	     * Convert 64 Bit Value to two 16 Bit Value to send as Modbus Registers
+	     * @param        doubleValue      Value to be converted
+	     * @param        registerOrder    High Register first or low Register first
+	     * @return       16 Bit Register values
+	     */
+		 public static int[] ConvertDoubleToRegisters(double doubleValue, RegisterOrder registerOrder)
+		 {
+		     int[] registerValues = ConvertDoubleToRegisters(doubleValue);
+		     int[] returnValue = registerValues;
+		     if (registerOrder == RegisterOrder.HighLow)
+		         returnValue = new int[] { registerValues[3], registerValues[2], registerValues[1], registerValues[0]};
+		     return returnValue;
+		 }
   
    	/**
     * Converts 16 - Bit Register values to String
@@ -1830,9 +1957,19 @@ public class ModbusClient
 	    return result;
 	}
 
-	public static byte[] toByteArrayDouble(int value)
+	public static byte[] toByteArrayInt(int value)
     {
 		return ByteBuffer.allocate(4).putInt(value).array();
+	}
+	
+	public static byte[] toByteArrayLong(long value)
+    {
+		return ByteBuffer.allocate(8).putLong(value).array();
+	}
+	
+	public static byte[] toByteArrayDouble(double value)
+    {
+		return ByteBuffer.allocate(8).putDouble(value).array();
 	}
 	
 	public static byte[] toByteArray(float value)
@@ -1868,6 +2005,23 @@ public class ModbusClient
 		}
 		return returnValue;
 	}
+	
+	public boolean Available(int timeout)
+	{
+        InetAddress address;
+		try {
+			address = InetAddress.getByName(this.ipAddress);
+			boolean reachable = address.isReachable(timeout);
+			return reachable;
+		} catch (IOException e) 
+		{
+			e.printStackTrace();
+			return false;			
+		}
+        
+	}
+	
+	
 	
         /**
         * Returns ip Address of Server
@@ -1932,33 +2086,143 @@ public class ModbusClient
 		this.connectTimeout = connectionTimeout;
 	}
         
-        public void setSerialFlag(boolean serialflag)
-        {
-            this.serialflag = serialflag;
-        }
-        
-        public boolean getSerialFlag()
-        {
-            return this.serialflag;
-        }
-        
-        public void setUnitIdentifier(byte unitIdentifier)
-        {
-            this.unitIdentifier = unitIdentifier;
-        }
-        
-        public byte getUnitIdentifier()
-        {
-            return this.unitIdentifier;
-        }
-        
-        public void addReveiveDataChangedListener(ReceiveDataChangedListener toAdd) 
-        {
-            receiveDataChangedListener.add(toAdd);
-        }
-        public void addSendDataChangedListener(SendDataChangedListener toAdd) 
-        {
-            sendDataChangedListener.add(toAdd);
-        }	
+    public void setSerialFlag(boolean serialflag)
+    {
+        this.serialflag = serialflag;
+    }
+    
+    public boolean getSerialFlag()
+    {
+        return this.serialflag;
+    }
+    
+    public void setUnitIdentifier(byte unitIdentifier)
+    {
+        this.unitIdentifier = unitIdentifier;
+    }
+    
+    public byte getUnitIdentifier()
+    {
+        return this.unitIdentifier;
+    }
+    
+    /**
+    * Sets the Mqtt Root Topic
+    * @param        mqttRootTopic      Mqtt Root Topic
+    */
+    public void setMqttRootTopic(String mqttRootTopic)
+    {
+    	this.mqttRootTopic = mqttRootTopic;
+    }
+    
+    /**
+    * Gets the Mqtt Root Topic
+    * @return   Mqtt Root Topic
+    */
+    public String getMqttRootTopic()
+    {
+    	return this.mqttRootTopic;
+    }
+    
+    /**
+    * Sets the Mqtt Username (if required)
+    * @param        mqttUserName      Mqtt Username
+    */
+    public void setMqttUserName(String mqttUserName)
+    {
+    	this.mqttUserName = mqttUserName;
+    }
+    
+    /**
+    * Gets the Mqtt UserName (if required)
+    * @return  Mqtt UserName
+    */
+    public String getMqttUserName()
+    {
+    	return this.mqttUserName;
+    }
+    
+    /**
+    * Sets the Mqtt Password (if required)
+    * @param        mqttPassword      Mqtt Password
+    */
+    public void setMqttPassword(String mqttPassword)
+    {
+    	this.mqttPassword = mqttPassword;
+    }
+    
+    /**
+    * Gets the Mqtt Password (if required)
+    * @return  Mqtt Password
+    */
+    public String getMqttPassword()
+    {
+    	return this.mqttPassword;
+    }
+    
+    /**
+    * Sets the Mqtt Broker Port - Standard is 1883
+    * @param        mqttBrokerPort      Mqtt Broker Port
+    */
+    public void setMqttBrokerPort(int mqttBrokerPort)
+    {
+    	this.mqttBrokerPort = mqttBrokerPort;
+    }
+    
+    
+    /**
+    * Gets the Mqtt Broker Port - Standard is 1883
+    * @return  Mqtt Broker Port
+    */
+    public int getMqttBrokerPort()
+    {
+    	return this.mqttBrokerPort;
+    }
+    
+    /**
+    * True: Values will be published only on change - FALSE: after every request
+    * @param        mqttPushOnChange      True: Values will be published only on change - FALSE: after every request
+    */
+    public void setMqttPushOnChange(boolean mqttPushOnChange)
+    {
+    	this.mqttPushOnChange = mqttPushOnChange;
+    }
+    
+    /**
+    * True: Values will be published only on change - FALSE: after every request
+    * @return  MQTT Push on change
+    */
+    public boolean getMqttPushOnChange()
+    {
+    	return this.mqttPushOnChange;
+    }
+    
+    /**
+    * Disables or Enables to Retain the Messages in the Broker - default is false (Enabled)
+    * @param        mqttRetainMessages     Retain Messages
+    */
+    public void setMqttRetainMessages(boolean mqttRetainMessages)
+    {
+    	this.mqttRetainMessages = mqttRetainMessages;
+    }
+    
+    /**
+    * Disables or Enables to Retain the Messages in the Broker - default is false (Enabled)
+    * @return  mqttRetainMessages
+    */
+    public boolean getMqttRetainMessages()
+    {
+    	return this.mqttRetainMessages;
+    }
+    
+    
+    public void addReveiveDataChangedListener(ReceiveDataChangedListener toAdd) 
+    {
+        receiveDataChangedListener.add(toAdd);
+    }
+    public void addSendDataChangedListener(SendDataChangedListener toAdd) 
+    {
+        sendDataChangedListener.add(toAdd);
+    }	
 	
 }                                                                                                
