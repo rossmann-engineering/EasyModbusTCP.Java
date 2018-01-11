@@ -1,20 +1,28 @@
 /*
- * Creative Commons license: Attribution-NonCommercial-NoDerivatives 4.0 International (CC BY-NC-ND 4.0)
- *You are free to:
- *
- *Share ó copy and redistribute the material in any medium or format
- *The licensor cannot revoke these freedoms as long as you follow the license terms.
- *
- *Under the following terms:
- *
- *Attribution ó You must give appropriate credit, provide a link to the license, and indicate if changes were made. You may do so in any reasonable manner, but not in any way that suggests the licensor endorses you or your use.
- *NonCommercial ó You may not use the material for commercial purposes.
- *NoDerivatives ó If you remix, transform, or build upon the material, you may not distribute the modified material.
- */
+ * (c) Stefan Roﬂmann
+ *	This program is free software: you can redistribute it and/or modify
+ *  it under the terms of the GNU General Public License as published by
+ *   the Free Software Foundation, either version 3 of the License, or
+ *  (at your option) any later version.
+
+ *  This program is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  GNU General Public License for more details.
+
+ *  You should have received a copy of the GNU General Public License
+ *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
+*/
 package ModbusRTU;
 import java.io.IOException;
 
+import org.eclipse.paho.client.mqttv3.MqttException;
+import org.eclipse.paho.client.mqttv3.MqttPersistenceException;
+
+import de.re.easymodbus.exceptions.ModbusException;
 import de.re.easymodbus.modbusclient.ModbusClient;
+import jssc.SerialPortException;
+import jssc.SerialPortTimeoutException;
 
 /**
  *
@@ -22,11 +30,19 @@ import de.re.easymodbus.modbusclient.ModbusClient;
  */
 public class ModbusRTU 
 {
-     public static void main(String args[]) throws IOException 
+     public static void main(String args[]) throws IOException, SerialPortException, ModbusException, SerialPortTimeoutException, MqttPersistenceException, MqttException, InterruptedException 
      {
     	 boolean success = false;
-         ModbusClient modbusClient = new ModbusClient("192.168.178.66", 502);
+         ModbusClient modbusClient = new ModbusClient("127.0.0.1",502);
          System.out.println(modbusClient.Available(500));
+         modbusClient.Connect();
+         while (true)
+         {
+        	 System.out.println(modbusClient.ReadInputRegisters(0, 10)[5]);
+        	 //Thread.sleep(200);
+         }
+         //modbusClient.WriteMultipleCoils(0, new boolean[] {true,true,true});
+         //modbusClient.Disconnect();
          /*
          while (success == false)
          {
