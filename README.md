@@ -20,16 +20,10 @@ See <a href="http://www.easymodbustcp.net">http://www.easymodbustcp.net</a> for 
 
 javadoc: <a href="http://easymodbustcp.net/javadoc/javadoc/index.html">http://easymodbustcp.net/javadoc/javadoc/index.html</a>
 
-License: Attribution-NoDerivatives 4.0 International (CC BY-ND 4.0)
+This file is part of the EasyModbus library.
 
-You are free to:
+EasyModbus is free software: you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation, either version 3 of the License, or (at your option) any later version.
 
-Share — copy and redistribute the material in any medium or format
-for any purpose, even commercially.
-The licensor cannot revoke these freedoms as long as you follow the license terms.
+EasyModbus is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for more details.
 
-Under the following terms:
-
-Attribution — You must give appropriate credit, provide a link to the license, and indicate if changes were made. You may do so in any reasonable manner, but not in any way that suggests the licensor endorses you or your use.
-NoDerivatives — If you remix, transform, or build upon the material, you may not distribute the modified material.
-No additional restrictions — You may not apply legal terms or technological measures that legally restrict others from doing anything the license permits.
+You should have received a copy of the GNU General Public License along with EasyModbus. If not, see http://www.gnu.org/licenses/.
