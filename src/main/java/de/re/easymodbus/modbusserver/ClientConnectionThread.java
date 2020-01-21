@@ -1,18 +1,19 @@
 /*
- * 
- * Creative Commons license: Attribution-NoDerivatives 4.0 International (CC BY-ND 4.0)
- * You are free to:
- *
- *Share - copy and redistribute the material in any medium or format
- *for any purpose, even commercially.
- *The licensor cannot revoke these freedoms as long as you follow the license terms.
- *Under the following terms:
- *
- *Attribution - You must give appropriate credit, provide a link to the license, and indicate if changes were made. You may do so in any reasonable manner, but not in any way that suggests the licensor endorses you or your use.
- *NoDerivatives - If you remix, transform, or build upon the material, you may not distribute the modified material.
- *No additional restrictions - You may not apply legal terms or technological measures that legally restrict others from doing anything the license permits.
- */
-package de.re.easymodbus.server;
+ * (c) Stefan Roßmann
+ *	This program is free software: you can redistribute it and/or modify
+ *  it under the terms of the GNU General Public License as published by
+ *   the Free Software Foundation, either version 3 of the License, or
+ *  (at your option) any later version.
+
+ *  This program is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  GNU General Public License for more details.
+
+ *  You should have received a copy of the GNU General Public License
+ *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
+*/
+package de.re.easymodbus.modbusserver;
 
 
 class ClientConnectionThread extends Thread 
@@ -30,16 +31,19 @@ class ClientConnectionThread extends Thread
 	public void run()
 	{
             this.easyModbusTCPServer.setNumberOfConnectedClients(this.easyModbusTCPServer.getNumberOfConnectedClients()+1);
-            System.out.println("Connected");
+            
             try
             {
+                socket.setSoTimeout(easyModbusTCPServer.getClientConnectionTimeout());
+                java.io.InputStream inputStream;                   
+                inputStream = socket.getInputStream();
                 while (socket.isConnected() & !socket.isClosed() & easyModbusTCPServer.getServerRunning())
 		{
-                    socket.setSoTimeout(10000);
-                    java.io.InputStream inputStream;                   
-                    inputStream = socket.getInputStream();
-                    inputStream.read(inBuffer);
+                	
+                    int numberOfBytes=(inputStream.read(inBuffer));
+                    if (numberOfBytes  > 4)
                     (new ProcessReceivedDataThread(inBuffer, easyModbusTCPServer, socket)).start();
+                    Thread.sleep(5);
 		}
                 this.easyModbusTCPServer.setNumberOfConnectedClients(this.easyModbusTCPServer.getNumberOfConnectedClients()-1);
                 socket.close();

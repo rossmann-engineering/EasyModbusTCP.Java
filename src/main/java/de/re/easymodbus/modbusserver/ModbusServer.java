@@ -1,20 +1,24 @@
 /*
- * Creative Commons license: Attribution-NonCommercial-NoDerivatives 4.0 International (CC BY-NC-ND 4.0)
- *You are free to:
- *
- *Share - copy and redistribute the material in any medium or format
- *The licensor cannot revoke these freedoms as long as you follow the license terms.
- *
- *Under the following terms:
- *
- *Attribution - You must give appropriate credit, provide a link to the license, and indicate if changes were made. You may do so in any reasonable manner, but not in any way that suggests the licensor endorses you or your use.
- *NonCommercial - You may not use the material for commercial purposes.
- *NoDerivatives - If you remix, transform, or build upon the material, you may not distribute the modified material.
- */
-package de.re.easymodbus.server;
+ * (c) Stefan Roßmann
+ *	This program is free software: you can redistribute it and/or modify
+ *  it under the terms of the GNU General Public License as published by
+ *   the Free Software Foundation, either version 3 of the License, or
+ *  (at your option) any later version.
+
+ *  This program is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  GNU General Public License for more details.
+
+ *  You should have received a copy of the GNU General Public License
+ *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
+*/
+package de.re.easymodbus.modbusserver;
 
 import java.io.IOException;
 import java.util.Calendar;
+
+import de.re.easymodbus.mqtt.EasyModbus2Mqtt;
 
      /**
      * @author Stefan Roßmann
@@ -24,12 +28,19 @@ public class ModbusServer extends Thread
     private int port = 502;
     protected ModbusProtocoll receiveData;
     protected ModbusProtocoll sendData =  new ModbusProtocoll();
+    @Deprecated
     public int[] holdingRegisters = new int[65535];
+    @Deprecated
     public int[] inputRegisters = new int[65535];
+    @Deprecated
     public boolean[] coils = new boolean[65535];
+    @Deprecated
     public boolean[] discreteInputs = new boolean[65535];
+    private DataModel dataModel = new DataModel();
     private int numberOfConnections = 0;
     public boolean udpFlag;
+    private int clientConnectionTimeout = 10000;
+    
 
     private ModbusProtocoll[] modbusLogData = new ModbusProtocoll[100];
     private boolean functionCode1Disabled;
@@ -60,6 +71,9 @@ public class ModbusServer extends Thread
 		System.out.println("");
 		System.out.println("Creative commons license");
 		System.out.println("Attribution-NonCommercial-NoDerivatives 4.0 International (CC BY-NC-ND 4.0)");
+        dataModel.easyModbus2Mqtt.setMqttRootTopic("easymodbusserver");
+        dataModel.easyModbus2Mqtt.setRetainMessages(true);
+        dataModel.easyModbus2Mqtt.setMqttBrokerAddress(null);
 	}
     
     @SuppressWarnings("deprecation")
@@ -584,7 +598,7 @@ public class ModbusServer extends Thread
         sendData.functionCode = receiveData.functionCode;
         sendData.startingAdress = receiveData.startingAdress;
         sendData.receiveCoilValues = receiveData.receiveCoilValues;
-        if ((receiveData.receiveCoilValues[0] != 0x0000) & (receiveData.receiveCoilValues[0] != 0xFF00))  //Invalid Value
+        if ((receiveData.receiveCoilValues[0] != 0x0000) & (receiveData.receiveCoilValues[0] != 0xFF))  //Invalid Value
         {
             sendData.errorCode = (byte)(receiveData.functionCode + 0x80);
             sendData.exceptionCode = 3;
@@ -594,13 +608,13 @@ public class ModbusServer extends Thread
             sendData.errorCode = (byte)(receiveData.functionCode + 0x80);
             sendData.exceptionCode = 2;
         }
-        if ((receiveData.receiveCoilValues[0] & 0xFF00) > 0)
+        if ((receiveData.receiveCoilValues[0]) > 0)
         {
-            coils[receiveData.startingAdress+1] = true;
+        	this.setCoil(true, receiveData.startingAdress+1);
         }
         if (receiveData.receiveCoilValues[0] == 0x0000)
         {
-            coils[receiveData.startingAdress+1] = false;
+        	this.setCoil(false, receiveData.startingAdress+1);
         }
         if (sendData.exceptionCode > 0)
             sendData.length = 0x03;
@@ -646,8 +660,8 @@ public class ModbusServer extends Thread
                 data[8] = (byte)((receiveData.startingAdress & 0xff00)>>8);
                 data[9] = (byte)(receiveData.startingAdress & 0xff);
 
-                data[10] = (byte)((receiveData.receiveCoilValues[0] & 0xff00)>>8);
-                data[11] = (byte)(receiveData.receiveCoilValues[0] & 0xff);
+                data[10] = (byte)((receiveData.receiveCoilValues[0]));
+                data[11] = 0;
             }
             
             java.io.OutputStream outputStream;
@@ -686,7 +700,7 @@ public class ModbusServer extends Thread
             sendData.errorCode = (byte)(receiveData.functionCode + 0x80);
             sendData.exceptionCode = 2;
         }
-        holdingRegisters[receiveData.startingAdress+1] = ((int)receiveData.receiveRegisterValues[0]);
+        this.setHoldingRegister(((int)receiveData.receiveRegisterValues[0]), receiveData.startingAdress+1);
         if (sendData.exceptionCode > 0)
             sendData.length = 0x03;
         else
@@ -774,6 +788,7 @@ public class ModbusServer extends Thread
         for (int i = 0; i < receiveData.quantity; i++)
         {
             int shift = i % 16;
+            /*
             if ((i == receiveData.quantity - 1) & (receiveData.quantity % 2 != 0))
             {
                 if (shift < 8)
@@ -781,13 +796,13 @@ public class ModbusServer extends Thread
                 else
                     shift = shift - 8;
             }
+            */
             int mask = 0x1;
             mask = mask << (shift);
             if ((receiveData.receiveCoilValues[i / 16] & mask) == 0)
-                coils[receiveData.startingAdress + i + 1] = false;
+            	this.setCoil(false, receiveData.startingAdress + i + 1);
             else
-                coils[receiveData.startingAdress + i + 1] = true;
-
+            	this.setCoil(true, receiveData.startingAdress + i + 1);
         }
         if (sendData.exceptionCode > 0)
             sendData.length = 0x03;
@@ -875,7 +890,7 @@ public class ModbusServer extends Thread
         }
         for (int i = 0; i < receiveData.quantity; i++)
         {
-            holdingRegisters[receiveData.startingAdress + i + 1] = (receiveData.receiveRegisterValues[i]);
+        	this.setHoldingRegister((receiveData.receiveRegisterValues[i]), receiveData.startingAdress + i + 1);
         }
         if (sendData.exceptionCode > 0)
             sendData.length = 0x03;
@@ -1212,5 +1227,110 @@ public class ModbusServer extends Thread
         this.notifyLogDataChanged = value;
     }
     
+    /**
+    * Gets the Client connection timeout, which disconnects a connection to a client
+    * @return clientConnectionTimout
+    */
+    public int getClientConnectionTimeout()
+    {
+    	return clientConnectionTimeout;
+    }
     
+    /*Sets the Client connection timeout, which disconnects a connection to a client
+    * @param value ClientConnectionTimeout
+    */
+    public void setClientConnectionTimeout(int value)
+    {
+    	clientConnectionTimeout = value;
+    }
+
+	public String getMqttBrokerAddress() {
+		return dataModel.easyModbus2Mqtt.getMqttBrokerAddress();
+	}
+
+	public void setMqttBrokerAddress(String mqttBrokerAddress) 
+	{
+		dataModel.easyModbus2Mqtt.setMqttBrokerAddress(mqttBrokerAddress);
+	}
+
+	public int getMqttBrokerPort() {
+		return dataModel.easyModbus2Mqtt.getMqttBrokerPort();
+	}
+
+	public void setMqttBrokerPort(int mqttBrokerPort) {
+		dataModel.easyModbus2Mqtt.setMqttBrokerPort(mqttBrokerPort);
+	}
+
+	public String getMqttRootTopic() {
+		return dataModel.easyModbus2Mqtt.getMqttRootTopic();
+	}
+
+	public void setMqttRootTopic(String mqttRootTopic) {
+		dataModel.easyModbus2Mqtt.setMqttRootTopic(mqttRootTopic);
+	}
+
+	public String getMqttUserName() {
+		return dataModel.easyModbus2Mqtt.getMqttUserName();
+	}
+
+	public void setMqttUserName(String mqttUserName) {
+		dataModel.easyModbus2Mqtt.setMqttUserName(mqttUserName);
+	}
+
+	public String getMqttPassword() {
+		return dataModel.easyModbus2Mqtt.getMqttPassword();
+	}
+
+	public void setMqttPassword(String mqttPassword) {
+		dataModel.easyModbus2Mqtt.setMqttPassword(mqttPassword);
+	}
+
+	public void setRetainMessages(boolean retainMessages) {
+		dataModel.easyModbus2Mqtt.setRetainMessages(retainMessages);
+	}
+
+	public int getHoldingRegister(int address) 
+	{
+		return dataModel.getHoldingRegister(address);
+	}
+
+	public void setHoldingRegister(int holdingRegisterValue, int address) 
+	{
+		this.dataModel.setHoldingRegister(address, holdingRegisterValue);
+		this.holdingRegisters[address] = holdingRegisterValue;
+		
+	}
+	
+	public int getInputRegister(int address) 
+	{
+		return dataModel.getInputRegister(address);
+	}
+
+	public void setInputRegister(int inputRegisterValue, int address) 
+	{
+		this.dataModel.setInputRegister(address, inputRegisterValue);
+		this.inputRegisters[address] = inputRegisterValue;
+	}
+
+	public boolean getCoil(int address) 
+	{
+		return dataModel.getCoil(address);
+	}
+
+	public void setCoil(boolean coilValue, int address) 
+	{
+		this.dataModel.setCoil(address, coilValue);
+		this.coils[address] = coilValue;
+	}
+ 
+	public boolean getDiscreteInput(int address) 
+	{
+		return dataModel.getDiscreteInput(address);
+	}
+
+	public void setDiscreteInput(boolean discreteInputValue, int address) 
+	{
+		this.dataModel.setDiscreteInput(address, discreteInputValue);
+		this.discreteInputs[address] = discreteInputValue;
+	}
 }

@@ -1,20 +1,18 @@
-
-
-
 /*
- * 
- * Creative Commons license: Attribution-NonCommercial-NoDerivatives 4.0 International (CC BY-NC-ND 4.0)
- *You are free to:
- *
- *Share - copy and redistribute the material in any medium or format
- *The licensor cannot revoke these freedoms as long as you follow the license terms.
- *
- *Under the following terms:
- *
- *Attribution - You must give appropriate credit, provide a link to the license, and indicate if changes were made. You may do so in any reasonable manner, but not in any way that suggests the licensor endorses you or your use.
- *NonCommercial - You may not use the material for commercial purposes.
- *NoDerivatives - If you remix, transform, or build upon the material, you may not distribute the modified material.
- */
+ * (c) Stefan Roßmann
+ *	This program is free software: you can redistribute it and/or modify
+ *  it under the terms of the GNU General Public License as published by
+ *   the Free Software Foundation, either version 3 of the License, or
+ *  (at your option) any later version.
+
+ *  This program is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  GNU General Public License for more details.
+
+ *  You should have received a copy of the GNU General Public License
+ *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
+*/
 package de.re.easymodbus.modbusclient.gui;
 
 import de.re.easymodbus.modbusclient.ModbusClient;
@@ -26,6 +24,8 @@ import javax.swing.GroupLayout.Alignment;
 import javax.swing.LayoutStyle.ComponentPlacement;
 import java.awt.event.ItemListener;
 import java.awt.event.ItemEvent;
+import java.awt.event.ActionListener;
+import java.awt.event.ActionEvent;
 /**
  *
  * @author Stefan Roßmann
@@ -85,6 +85,10 @@ implements ReceiveDataChangedListener , SendDataChangedListener
 
         jLabel1 = new javax.swing.JLabel();
         jButton1 = new javax.swing.JButton();
+        jButton1.addActionListener(new ActionListener() {
+        	public void actionPerformed(ActionEvent arg0) {
+        	}
+        });
         jButton2 = new javax.swing.JButton();
         jButton3 = new javax.swing.JButton();
         jButton4 = new javax.swing.JButton();
@@ -283,17 +287,17 @@ implements ReceiveDataChangedListener , SendDataChangedListener
         								.addComponent(jButton4, GroupLayout.DEFAULT_SIZE, GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)))
         						.addGroup(groupLayout.createSequentialGroup()
         							.addContainerGap()
-        							.addComponent(jpModbusTCP, GroupLayout.PREFERRED_SIZE, 174, GroupLayout.PREFERRED_SIZE))
+        							.addComponent(jpModbusRTU, GroupLayout.PREFERRED_SIZE, 174, GroupLayout.PREFERRED_SIZE))
         						.addGroup(groupLayout.createSequentialGroup()
         							.addContainerGap()
-        							.addComponent(jpModbusRTU, GroupLayout.PREFERRED_SIZE, 174, GroupLayout.PREFERRED_SIZE)))
+        							.addComponent(jpModbusTCP, GroupLayout.PREFERRED_SIZE, 174, GroupLayout.PREFERRED_SIZE)))
         					.addPreferredGap(ComponentPlacement.RELATED)
         					.addComponent(jPanel1, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE))
         				.addGroup(groupLayout.createSequentialGroup()
         					.addGap(10)
         					.addComponent(jScrollPane2, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE)
         					.addPreferredGap(ComponentPlacement.RELATED)
-        					.addComponent(jTextArea1)))
+        					.addComponent(jTextArea1, GroupLayout.DEFAULT_SIZE, 424, Short.MAX_VALUE)))
         			.addContainerGap())
         );
         groupLayout.setVerticalGroup(
@@ -303,9 +307,9 @@ implements ReceiveDataChangedListener , SendDataChangedListener
         			.addGap(11)
         			.addComponent(comboBox, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE)
         			.addGap(7)
-        			.addGroup(groupLayout.createParallelGroup(Alignment.TRAILING, false)
-        				.addComponent(jPanel1, Alignment.LEADING, GroupLayout.DEFAULT_SIZE, GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-        				.addGroup(Alignment.LEADING, groupLayout.createSequentialGroup()
+        			.addGroup(groupLayout.createParallelGroup(Alignment.LEADING, false)
+        				.addComponent(jPanel1, GroupLayout.DEFAULT_SIZE, GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+        				.addGroup(groupLayout.createSequentialGroup()
         					.addComponent(jpModbusTCP, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE)
         					.addGap(2)
         					.addComponent(jpModbusRTU, GroupLayout.PREFERRED_SIZE, 51, GroupLayout.PREFERRED_SIZE)
@@ -340,17 +344,14 @@ implements ReceiveDataChangedListener , SendDataChangedListener
         	gl_jpModbusTCP.createParallelGroup(Alignment.LEADING)
         		.addGroup(gl_jpModbusTCP.createSequentialGroup()
         			.addContainerGap()
-        			.addGroup(gl_jpModbusTCP.createParallelGroup(Alignment.TRAILING)
-        				.addGroup(gl_jpModbusTCP.createSequentialGroup()
-        					.addComponent(jLabel3)
-        					.addGap(75))
-        				.addGroup(gl_jpModbusTCP.createSequentialGroup()
-        					.addComponent(jTextFieldIPAddress, GroupLayout.PREFERRED_SIZE, 122, GroupLayout.PREFERRED_SIZE)
-        					.addPreferredGap(ComponentPlacement.RELATED)))
         			.addGroup(gl_jpModbusTCP.createParallelGroup(Alignment.LEADING)
-        				.addComponent(jTextFieldPort, GroupLayout.PREFERRED_SIZE, 46, GroupLayout.PREFERRED_SIZE)
-        				.addComponent(jLabel4))
-        			.addContainerGap())
+        				.addComponent(jTextFieldIPAddress, GroupLayout.PREFERRED_SIZE, 110, GroupLayout.PREFERRED_SIZE)
+        				.addComponent(jLabel3))
+        			.addPreferredGap(ComponentPlacement.RELATED)
+        			.addGroup(gl_jpModbusTCP.createParallelGroup(Alignment.LEADING)
+        				.addComponent(jLabel4)
+        				.addComponent(jTextFieldPort, GroupLayout.PREFERRED_SIZE, 46, GroupLayout.PREFERRED_SIZE))
+        			.addGap(2))
         );
         gl_jpModbusTCP.setVerticalGroup(
         	gl_jpModbusTCP.createParallelGroup(Alignment.LEADING)
@@ -360,8 +361,8 @@ implements ReceiveDataChangedListener , SendDataChangedListener
         				.addComponent(jLabel4))
         			.addPreferredGap(ComponentPlacement.RELATED)
         			.addGroup(gl_jpModbusTCP.createParallelGroup(Alignment.BASELINE)
-        				.addComponent(jTextFieldPort, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE)
-        				.addComponent(jTextFieldIPAddress, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE))
+        				.addComponent(jTextFieldIPAddress, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE)
+        				.addComponent(jTextFieldPort, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE))
         			.addContainerGap())
         );
         jpModbusTCP.setLayout(gl_jpModbusTCP);
