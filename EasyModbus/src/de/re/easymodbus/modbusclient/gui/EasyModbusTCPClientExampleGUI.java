@@ -419,7 +419,7 @@ implements ReceiveDataChangedListener , SendDataChangedListener
             {
             	try
             	{
-            		modbusClient.setUnitIdentifier((byte)1);
+            		modbusClient.setUnitIdentifier(Short.valueOf(textField_1.getText()));
             		modbusClient.Connect(txtCom.getText());
             	}
             	catch (Exception e)
@@ -453,7 +453,7 @@ implements ReceiveDataChangedListener , SendDataChangedListener
         		modbusClient.setPort(Integer.valueOf(jTextFieldPort.getText()));
         		try
         		{
-        			modbusClient.setUnitIdentifier((byte)1);
+
         			modbusClient.Connect();
         		}
         		catch (Exception e)
@@ -465,6 +465,7 @@ implements ReceiveDataChangedListener , SendDataChangedListener
             {
             	try
             	{
+					modbusClient.setUnitIdentifier(Short.valueOf(textField_1.getText()));
             		modbusClient.Connect(txtCom.getText());
             	}
             	catch (Exception e)
@@ -498,6 +499,7 @@ implements ReceiveDataChangedListener , SendDataChangedListener
         		modbusClient.setPort(Integer.valueOf(jTextFieldPort.getText()));
         		try
         		{
+
         			modbusClient.Connect();
         		}
         		catch (Exception e)
@@ -509,6 +511,7 @@ implements ReceiveDataChangedListener , SendDataChangedListener
             {
             	try
             	{
+					modbusClient.setUnitIdentifier(Short.valueOf(textField_1.getText()));
             		modbusClient.Connect(txtCom.getText());
             	}
             	catch (Exception e)
@@ -542,6 +545,7 @@ implements ReceiveDataChangedListener , SendDataChangedListener
         		modbusClient.setPort(Integer.valueOf(jTextFieldPort.getText()));
         		try
         		{
+
         			modbusClient.Connect();
         		}
         		catch (Exception e)
@@ -553,6 +557,7 @@ implements ReceiveDataChangedListener , SendDataChangedListener
             {
             	try
             	{
+					modbusClient.setUnitIdentifier(Short.valueOf(textField_1.getText()));
             		modbusClient.Connect(txtCom.getText());
             	}
             	catch (Exception e)

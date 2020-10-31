@@ -2195,12 +2195,12 @@ public class ModbusClient
         return this.serialflag;
     }
     
-    public void setUnitIdentifier(byte unitIdentifier)
+    public void setUnitIdentifier(short unitIdentifier)
     {
-        this.unitIdentifier = unitIdentifier;
+        this.unitIdentifier = (byte)unitIdentifier;
     }
     
-    public byte getUnitIdentifier()
+    public short getUnitIdentifier()
     {
         return this.unitIdentifier;
     }
