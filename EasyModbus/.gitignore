@@ -2,3 +2,6 @@
 /EasyModbus/
 /nbproject/
 /manifest.mf
+target
+*.iml
+.idea
