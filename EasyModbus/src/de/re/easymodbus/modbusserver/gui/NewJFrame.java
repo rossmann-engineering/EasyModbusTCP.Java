@@ -887,10 +887,9 @@ public class NewJFrame extends javax.swing.JFrame implements de.re.easymodbus.mo
     private void WebViewStateChanged(javax.swing.event.ChangeEvent evt)
     {
         topic = new Random().nextInt(99999);
-        modbusServer.setMqttRootTopic("easymodbusserver/"+ topic);
         if (chckbxEnableWebview.isSelected())
         {
-            modbusServer.setMqttBrokerAddress("www.mqtt-dashboard.com");
+
             link = "http://www.easymodbustcp.net/webview/easymodbuswebview.html?topic=" + topic;
             lblLink.setText("<html><a href =\""+link+"\">"+link+"</a></html>" );
             lblWebViewAddress.setVisible(true);
@@ -901,7 +900,7 @@ public class NewJFrame extends javax.swing.JFrame implements de.re.easymodbus.mo
 
         else
         {
-        	modbusServer.setMqttBrokerAddress(null);
+
             lblWebViewAddress.setVisible(false);
             lblLink.setVisible(false);
 

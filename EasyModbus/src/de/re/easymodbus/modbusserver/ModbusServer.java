@@ -1,5 +1,5 @@
 /*
- * (c) Stefan Roßmann
+ * (c) Stefan Roï¿½mann
  *	This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
  *   the Free Software Foundation, either version 3 of the License, or
@@ -18,7 +18,6 @@ package de.re.easymodbus.modbusserver;
 import java.io.IOException;
 import java.util.Calendar;
 
-import de.re.easymodbus.mqtt.EasyModbus2Mqtt;
 
      /**
      * @author Stefan RoÃŸmann
@@ -69,11 +68,6 @@ public class ModbusServer extends Thread
 		System.out.println("Copyright (c) Stefan Rossmann Engineering Solutions");
 		System.out.println("www.rossmann-engineering.de");
 		System.out.println("");
-		System.out.println("Creative commons license");
-		System.out.println("Attribution-NonCommercial-NoDerivatives 4.0 International (CC BY-NC-ND 4.0)");
-        dataModel.easyModbus2Mqtt.setMqttRootTopic("easymodbusserver");
-        dataModel.easyModbus2Mqtt.setRetainMessages(true);
-        dataModel.easyModbus2Mqtt.setMqttBrokerAddress(null);
 	}
     
     @SuppressWarnings("deprecation")
@@ -1244,50 +1238,7 @@ public class ModbusServer extends Thread
     	clientConnectionTimeout = value;
     }
 
-	public String getMqttBrokerAddress() {
-		return dataModel.easyModbus2Mqtt.getMqttBrokerAddress();
-	}
 
-	public void setMqttBrokerAddress(String mqttBrokerAddress) 
-	{
-		dataModel.easyModbus2Mqtt.setMqttBrokerAddress(mqttBrokerAddress);
-	}
-
-	public int getMqttBrokerPort() {
-		return dataModel.easyModbus2Mqtt.getMqttBrokerPort();
-	}
-
-	public void setMqttBrokerPort(int mqttBrokerPort) {
-		dataModel.easyModbus2Mqtt.setMqttBrokerPort(mqttBrokerPort);
-	}
-
-	public String getMqttRootTopic() {
-		return dataModel.easyModbus2Mqtt.getMqttRootTopic();
-	}
-
-	public void setMqttRootTopic(String mqttRootTopic) {
-		dataModel.easyModbus2Mqtt.setMqttRootTopic(mqttRootTopic);
-	}
-
-	public String getMqttUserName() {
-		return dataModel.easyModbus2Mqtt.getMqttUserName();
-	}
-
-	public void setMqttUserName(String mqttUserName) {
-		dataModel.easyModbus2Mqtt.setMqttUserName(mqttUserName);
-	}
-
-	public String getMqttPassword() {
-		return dataModel.easyModbus2Mqtt.getMqttPassword();
-	}
-
-	public void setMqttPassword(String mqttPassword) {
-		dataModel.easyModbus2Mqtt.setMqttPassword(mqttPassword);
-	}
-
-	public void setRetainMessages(boolean retainMessages) {
-		dataModel.easyModbus2Mqtt.setRetainMessages(retainMessages);
-	}
 
 	public int getHoldingRegister(int address) 
 	{

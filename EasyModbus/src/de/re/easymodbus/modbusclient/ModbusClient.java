@@ -1,5 +1,5 @@
 /*
- * (c) Stefan Roßmann
+ * (c) Stefan Roï¿½mann
  *	This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
  *   the Free Software Foundation, either version 3 of the License, or
@@ -21,14 +21,13 @@ import java.nio.ByteBuffer;
 import java.io.*;
 import java.util.*;
 
-import org.eclipse.paho.client.mqttv3.MqttException;
-import org.eclipse.paho.client.mqttv3.MqttPersistenceException;
+
 
 import java.io.InputStream;
 import jssc.*;
 import de.re.easymodbus.datatypes.*;
 import de.re.easymodbus.exceptions.ModbusException;
-import de.re.easymodbus.mqtt.EasyModbus2Mqtt;
+
 
 
      /**
@@ -57,18 +56,8 @@ public class ModbusClient
 	private List<ReceiveDataChangedListener> receiveDataChangedListener = new ArrayList<ReceiveDataChangedListener>();
 	private List<SendDataChangedListener> sendDataChangedListener = new ArrayList<SendDataChangedListener>();
 	private SerialPort serialPort;
-	private String mqttRootTopic = "easymodbusclient";
-	private String mqttUserName;
-	private String mqttPassword;
+
 	private String comPort;
-    private int mqttBrokerPort = 1883;
-    private boolean mqttPushOnChange = true;
-    private boolean mqttRetainMessages = false;
-    private EasyModbus2Mqtt easyModbus2Mqtt;
-    private boolean[] mqttCoilsOldValues;
-    private boolean[] mqttDiscreteInputsOldValues;
-    private int[] mqttInputRegistersOldValues;
-    private int[] mqttHoldingRegistersOldValues;
     private int numberOfRetries = 3;				//Number of retries in case of serial connection
     private int baudrate = 9600;
     private Parity parity = Parity.Even;
@@ -81,8 +70,6 @@ public class ModbusClient
 		System.out.println("Copyright (c) Stefan Rossmann Engineering Solutions");
 		System.out.println("www.rossmann-engineering.de");
 		System.out.println("");
-		System.out.println("Creative commons license");
-		System.out.println("Attribution-NonCommercial-NoDerivatives 4.0 International (CC BY-NC-ND 4.0)");
 		if (debug) StoreLogData.getInstance().Store("EasyModbus library initialized for Modbus-TCP, IPAddress: " + ipAddress + ", Port: "+port);
 		this.ipAddress = ipAddress;
 		this.port = port;
@@ -94,8 +81,6 @@ public class ModbusClient
 		System.out.println("Copyright (c) Stefan Rossmann Engineering Solutions");
 		System.out.println("www.rossmann-engineering.de");
 		System.out.println("");
-		System.out.println("Creative commons license");
-		System.out.println("Attribution-NonCommercial-NoDerivatives 4.0 International (CC BY-NC-ND 4.0)");
 		if (debug) StoreLogData.getInstance().Store("EasyModbus library initialized for Modbus-TCP");
 	}
 	
@@ -105,8 +90,6 @@ public class ModbusClient
 		System.out.println("Copyright (c) Stefan Rossmann Engineering Solutions");
 		System.out.println("www.rossmann-engineering.de");
 		System.out.println("");
-		System.out.println("Creative commons license");
-		System.out.println("Attribution-NonCommercial-NoDerivatives 4.0 International (CC BY-NC-ND 4.0)");
 		if (debug) StoreLogData.getInstance().Store("EasyModbus library initialized for Modbus-RTU, COM-Port: " + serialPort);
 		this.comPort = serialPort;	
 		this.serialflag = true;
@@ -662,57 +645,7 @@ public class ModbusClient
             byte[] returnValue = {uchCRCLo, uchCRCHi};
             return returnValue ;
         }
-    
- 
-    /**
-     *  Read Discrete Inputs from Server device (FC2) and publishes the values to a MQTT-Broker.
-     *  The Topic will be easymodbusclient/discreteinputs/'address' e.g. easymodbusclient/discreteinputs/0 for address "0".
-     *  Note that the Address that will be publishes is "0"-Based. The Root topic can be changed using the Parameter
-     *  By default we are using the Standard-Port 1883. This Port can be changed using the Property "MqttBrokerPort"
-     *  A Username and Passowrd can be provided using the Properties "MqttUserName" and "MqttPassword"
-     *  'MqttRootTopic' Default is 'easymodbusclient'
-     * @param startingAddress	First discrete input to read
-     * @param quantity	Number of discrete Inputs to read
-     * @param mqttBrokerAddress	Broker address the values will be published to
-     * @return	Boolean Array which contains the discrete Inputs
-     * @throws MqttException 
-     * @throws MqttPersistenceException 
-     * @throws SerialPortTimeoutException 
-     * @throws SerialPortException 
-     * @throws IOException 
-     * @throws ModbusException 
-     * @throws SocketException 
-     * @throws UnknownHostException 
-     */
-    public boolean[] ReadDiscreteInputs(int startingAddress, int quantity, String mqttBrokerAddress) throws MqttPersistenceException, MqttException, UnknownHostException, SocketException, ModbusException, IOException, SerialPortException, SerialPortTimeoutException
-    {
-        boolean[] returnValue = this.ReadDiscreteInputs(startingAddress, quantity);
-        List<String> topic = new ArrayList<String>();
-        List<String> payload = new ArrayList<String>();
-        if (mqttPushOnChange && mqttDiscreteInputsOldValues == null)
-            mqttDiscreteInputsOldValues = new boolean[65535];
-        for (int i = 0; i < returnValue.length; i++)
-        {
-            if (mqttDiscreteInputsOldValues == null ? true : (mqttDiscreteInputsOldValues[i] != returnValue[i]))
-            {
-                topic.add(mqttRootTopic + "/discreteinputs/" + Integer.toString(i + startingAddress));
-                payload.add(Boolean.toString(returnValue[i]));
-                mqttDiscreteInputsOldValues[i] = returnValue[i];
-            }
-        }
-        
-        if (easyModbus2Mqtt == null)
-            easyModbus2Mqtt = new EasyModbus2Mqtt();
-        easyModbus2Mqtt.setMqttBrokerPort(this.mqttBrokerPort);
-        easyModbus2Mqtt.setMqttUserName(this.mqttUserName);
-        easyModbus2Mqtt.setMqttPassword(this.mqttPassword);
-        easyModbus2Mqtt.setRetainMessages(this.mqttRetainMessages);
-        easyModbus2Mqtt.publish(topic.toArray(new String[topic.size()]), payload.toArray(new String[payload.size()]), mqttBrokerAddress);
 
-        return returnValue;
-    }
-    
-    
         /**
         * Read Discrete Inputs from Server
         * @param        startingAddress      Fist Address to read; Shifted by -1	
@@ -869,54 +802,7 @@ public class ModbusClient
 		
 		return (response);
 	}
-	
-    /**
-     *  Read Coils from Server device (FC1) and publishes the values to a MQTT-Broker.
-     *  The Topic will be easymodbusclient/coils/'address' e.g. easymodbusclient/coils/0 for address "0".
-     *  Note that the Address that will be publishes is "0"-Based. The Root topic can be changed using the Parameter
-     *  By default we are using the Standard-Port 1883. This Port can be changed using the Property "MqttBrokerPort"
-     *  A Username and Passowrd can be provided using the Properties "MqttUserName" and "MqttPassword"
-     *  'MqttRootTopic' Default is 'easymodbusclient'
-     * @param startingAddress	First coil to read
-     * @param quantity	Number of coils to read
-     * @param mqttBrokerAddress	Broker address the values will be published to
-     * @return	Boolean Array which contains the coils
-     * @throws MqttException 
-     * @throws MqttPersistenceException 
-     * @throws SerialPortTimeoutException 
-     * @throws SerialPortException 
-     * @throws IOException 
-     * @throws ModbusException 
-     * @throws SocketException 
-     * @throws UnknownHostException 
-     */
-    public boolean[] ReadCoils(int startingAddress, int quantity, String mqttBrokerAddress) throws MqttPersistenceException, MqttException, UnknownHostException, SocketException, ModbusException, IOException, SerialPortException, SerialPortTimeoutException
-    {
-        boolean[] returnValue = this.ReadCoils(startingAddress, quantity);
-        List<String> topic = new ArrayList<String>();
-        List<String> payload = new ArrayList<String>();
-        if (mqttPushOnChange && mqttCoilsOldValues == null)
-            mqttCoilsOldValues = new boolean[65535];
-        for (int i = 0; i < returnValue.length; i++)
-        {
-            if (mqttCoilsOldValues == null ? true : (mqttCoilsOldValues[i] != returnValue[i]))
-            {
-                topic.add(mqttRootTopic + "/coils/" + Integer.toString(i + startingAddress));
-                payload.add(Boolean.toString(returnValue[i]));
-                mqttCoilsOldValues[i] = returnValue[i];
-            }
-        }
-        
-        if (easyModbus2Mqtt == null)
-            easyModbus2Mqtt = new EasyModbus2Mqtt();
-        easyModbus2Mqtt.setMqttBrokerPort(this.mqttBrokerPort);
-        easyModbus2Mqtt.setMqttUserName(this.mqttUserName);
-        easyModbus2Mqtt.setMqttPassword(this.mqttPassword);
-        easyModbus2Mqtt.setRetainMessages(this.mqttRetainMessages);
-        easyModbus2Mqtt.publish(topic.toArray(new String[topic.size()]), payload.toArray(new String[payload.size()]), mqttBrokerAddress);
 
-        return returnValue;
-    }
 	
         /**
         * Read Coils from Server
@@ -1071,54 +957,7 @@ public class ModbusClient
 		
 		return (response);
 	}
- 
-    /**
-     *  Read Holding Registers from Server device and publishes the values to a MQTT-Broker.
-     *  The Topic will be easymodbusclient/holdingregisters/'address' e.g. easymodbusclient/holdingregisters/0 for address "0".
-     *  Note that the Address that will be publishes is "0"-Based. The Root topic can be changed using the Parameter
-     *  By default we are using the Standard-Port 1883. This Port can be changed using the Property "MqttBrokerPort"
-     *  A Username and Passowrd can be provided using the Properties "MqttUserName" and "MqttPassword"
-     *  'MqttRootTopic' Default is 'easymodbusclient'
-     * @param startingAddress	First Holding Register to read
-     * @param quantity	Number of Holding Registers to read
-     * @param mqttBrokerAddress	Broker address the values will be published to
-     * @return	Boolean Array which contains the Holding Registers
-     * @throws MqttException 
-     * @throws MqttPersistenceException 
-     * @throws SerialPortTimeoutException 
-     * @throws SerialPortException 
-     * @throws IOException 
-     * @throws ModbusException 
-     * @throws SocketException 
-     * @throws UnknownHostException 
-     */
-    public int[] ReadHoldingRegisters(int startingAddress, int quantity, String mqttBrokerAddress) throws MqttPersistenceException, MqttException, UnknownHostException, SocketException, ModbusException, IOException, SerialPortException, SerialPortTimeoutException
-    {
-        int[] returnValue = this.ReadHoldingRegisters(startingAddress, quantity);
-        List<String> topic = new ArrayList<String>();
-        List<String> payload = new ArrayList<String>();
-        if (mqttPushOnChange && mqttHoldingRegistersOldValues == null)
-        	mqttHoldingRegistersOldValues = new int[65535];
-        for (int i = 0; i < returnValue.length; i++)
-        {
-            if (mqttHoldingRegistersOldValues == null ? true : (mqttHoldingRegistersOldValues[i] != returnValue[i]))
-            {
-                topic.add(mqttRootTopic + "/holdingregisters/" + Integer.toString(i + startingAddress));
-                payload.add(Integer.toString(returnValue[i]));
-                mqttHoldingRegistersOldValues[i] = returnValue[i];
-            }
-        }
-        
-        if (easyModbus2Mqtt == null)
-            easyModbus2Mqtt = new EasyModbus2Mqtt();
-        easyModbus2Mqtt.setMqttBrokerPort(this.mqttBrokerPort);
-        easyModbus2Mqtt.setMqttUserName(this.mqttUserName);
-        easyModbus2Mqtt.setMqttPassword(this.mqttPassword);
-        easyModbus2Mqtt.setRetainMessages(this.mqttRetainMessages);
-        easyModbus2Mqtt.publish(topic.toArray(new String[topic.size()]), payload.toArray(new String[payload.size()]), mqttBrokerAddress);
 
-        return returnValue;
-    }	
 	
         /**
         * Read Holding Registers from Server
@@ -1282,53 +1121,6 @@ public class ModbusClient
 		return (response);
 	}
 
-    /**
-     *  Read Input Registers from Server device and publishes the values to a MQTT-Broker.
-     *  The Topic will be easymodbusclient/inputregisters/'address' e.g. easymodbusclient/inputregisters/0 for address "0".
-     *  Note that the Address that will be publishes is "0"-Based. The Root topic can be changed using the Parameter
-     *  By default we are using the Standard-Port 1883. This Port can be changed using the Property "MqttBrokerPort"
-     *  A Username and Passowrd can be provided using the Properties "MqttUserName" and "MqttPassword"
-     *  'MqttRootTopic' Default is 'easymodbusclient'
-     * @param startingAddress	First Input Register to read
-     * @param quantity	Number of Input Registers to read
-     * @param mqttBrokerAddress	Broker address the values will be published to
-     * @return	Boolean Array which contains the Input Registers
-     * @throws MqttException 
-     * @throws MqttPersistenceException 
-     * @throws SerialPortTimeoutException 
-     * @throws SerialPortException 
-     * @throws IOException 
-     * @throws ModbusException 
-     * @throws SocketException 
-     * @throws UnknownHostException 
-     */
-    public int[] ReadInputRegisters(int startingAddress, int quantity, String mqttBrokerAddress) throws MqttPersistenceException, MqttException, UnknownHostException, SocketException, ModbusException, IOException, SerialPortException, SerialPortTimeoutException
-    {
-        int[] returnValue = this.ReadInputRegisters(startingAddress, quantity);
-        List<String> topic = new ArrayList<String>();
-        List<String> payload = new ArrayList<String>();
-        if (mqttPushOnChange && mqttInputRegistersOldValues == null)
-        	mqttInputRegistersOldValues = new int[65535];
-        for (int i = 0; i < returnValue.length; i++)
-        {
-            if (mqttInputRegistersOldValues == null ? true : (mqttInputRegistersOldValues[i] != returnValue[i]))
-            {
-                topic.add(mqttRootTopic + "/inputregisters/" + Integer.toString(i + startingAddress));
-                payload.add(Integer.toString(returnValue[i]));
-                mqttInputRegistersOldValues[i] = returnValue[i];
-            }
-        }
-        
-        if (easyModbus2Mqtt == null)
-            easyModbus2Mqtt = new EasyModbus2Mqtt();
-        easyModbus2Mqtt.setMqttBrokerPort(this.mqttBrokerPort);
-        easyModbus2Mqtt.setMqttUserName(this.mqttUserName);
-        easyModbus2Mqtt.setMqttPassword(this.mqttPassword);
-        easyModbus2Mqtt.setRetainMessages(this.mqttRetainMessages);
-        easyModbus2Mqtt.publish(topic.toArray(new String[topic.size()]), payload.toArray(new String[payload.size()]), mqttBrokerAddress);
-
-        return returnValue;
-    }		
 	
 	/**
         * Read Input Registers from Server
@@ -2247,15 +2039,6 @@ public class ModbusClient
 			}
 			
 		}
-		if (this.easyModbus2Mqtt != null)
-		{
-			if (this.easyModbus2Mqtt.isConnected())
-				try {
-					easyModbus2Mqtt.Disconnect();
-				} catch (MqttException e) {
-					e.printStackTrace();
-				}
-		}
 	}
 	
 	
@@ -2415,116 +2198,8 @@ public class ModbusClient
     {
         return this.unitIdentifier;
     }
-    
-    /**
-    * Sets the Mqtt Root Topic
-    * @param        mqttRootTopic      Mqtt Root Topic
-    */
-    public void setMqttRootTopic(String mqttRootTopic)
-    {
-    	this.mqttRootTopic = mqttRootTopic;
-    }
-    
-    /**
-    * Gets the Mqtt Root Topic
-    * @return   Mqtt Root Topic
-    */
-    public String getMqttRootTopic()
-    {
-    	return this.mqttRootTopic;
-    }
-    
-    /**
-    * Sets the Mqtt Username (if required)
-    * @param        mqttUserName      Mqtt Username
-    */
-    public void setMqttUserName(String mqttUserName)
-    {
-    	this.mqttUserName = mqttUserName;
-    }
-    
-    /**
-    * Gets the Mqtt UserName (if required)
-    * @return  Mqtt UserName
-    */
-    public String getMqttUserName()
-    {
-    	return this.mqttUserName;
-    }
-    
-    /**
-    * Sets the Mqtt Password (if required)
-    * @param        mqttPassword      Mqtt Password
-    */
-    public void setMqttPassword(String mqttPassword)
-    {
-    	this.mqttPassword = mqttPassword;
-    }
-    
-    /**
-    * Gets the Mqtt Password (if required)
-    * @return  Mqtt Password
-    */
-    public String getMqttPassword()
-    {
-    	return this.mqttPassword;
-    }
-    
-    /**
-    * Sets the Mqtt Broker Port - Standard is 1883
-    * @param        mqttBrokerPort      Mqtt Broker Port
-    */
-    public void setMqttBrokerPort(int mqttBrokerPort)
-    {
-    	this.mqttBrokerPort = mqttBrokerPort;
-    }
-    
-    
-    /**
-    * Gets the Mqtt Broker Port - Standard is 1883
-    * @return  Mqtt Broker Port
-    */
-    public int getMqttBrokerPort()
-    {
-    	return this.mqttBrokerPort;
-    }
-    
-    /**
-    * True: Values will be published only on change - FALSE: after every request
-    * @param        mqttPushOnChange      True: Values will be published only on change - FALSE: after every request
-    */
-    public void setMqttPushOnChange(boolean mqttPushOnChange)
-    {
-    	this.mqttPushOnChange = mqttPushOnChange;
-    }
-    
-    /**
-    * True: Values will be published only on change - FALSE: after every request
-    * @return  MQTT Push on change
-    */
-    public boolean getMqttPushOnChange()
-    {
-    	return this.mqttPushOnChange;
-    }
-    
-    /**
-    * Disables or Enables to Retain the Messages in the Broker - default is false (Enabled)
-    * @param        mqttRetainMessages     Retain Messages
-    */
-    public void setMqttRetainMessages(boolean mqttRetainMessages)
-    {
-    	this.mqttRetainMessages = mqttRetainMessages;
-    }
-    
-    /**
-    * Disables or Enables to Retain the Messages in the Broker - default is false (Enabled)
-    * @return  mqttRetainMessages
-    */
-    public boolean getMqttRetainMessages()
-    {
-    	return this.mqttRetainMessages;
-    }
-    
+
+
     /**
      * Sets and enables the Logfilename which writes information about received and send messages to File
      * @param logFileName	File name to log files
