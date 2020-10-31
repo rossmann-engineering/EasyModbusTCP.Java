@@ -1,5 +1,5 @@
 /*
- * (c) Stefan Roﬂmann
+ * (c) Stefan Rossmann
  *	This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
  *   the Free Software Foundation, either version 3 of the License, or
@@ -16,8 +16,6 @@
 package ModbusRTU;
 import java.io.IOException;
 
-import org.eclipse.paho.client.mqttv3.MqttException;
-import org.eclipse.paho.client.mqttv3.MqttPersistenceException;
 
 import de.re.easymodbus.exceptions.ModbusException;
 import de.re.easymodbus.modbusclient.ModbusClient;
@@ -30,7 +28,7 @@ import jssc.SerialPortTimeoutException;
  */
 public class ModbusRTU 
 {
-     public static void main(String args[]) throws IOException, SerialPortException, ModbusException, SerialPortTimeoutException, MqttPersistenceException, MqttException, InterruptedException 
+     public static void main(String args[]) throws IOException, SerialPortException, ModbusException, SerialPortTimeoutException, InterruptedException
      {
     	 boolean success = false;
          ModbusClient modbusClient = new ModbusClient("127.0.0.1",502);

@@ -43,7 +43,7 @@ public class NewJFrame extends javax.swing.JFrame implements de.re.easymodbus.mo
         modbusServer.setNotifyHoldingRegistersChanged(this);
         modbusServer.setNotifyNumberOfConnectedClientsChanged(this);
         modbusServer.setNotifyLogDataChanged(this);
-        modbusServer.setClientConnectionTimeout(0);
+        modbusServer.setClientConnectionTimeout(10000);
         try
         {
             modbusServer.Listen();

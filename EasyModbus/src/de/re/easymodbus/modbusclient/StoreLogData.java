@@ -10,7 +10,7 @@ import java.io.StringWriter;
  * Stores Log Data is a File. The Data will be stored in the File logDataYYYYMMDD.txt
  * Example: logData20170403.txt
  * 
- * @author Stefan Roﬂmann
+ * @author Stefan Rossmann
  */
 
 public class StoreLogData 
