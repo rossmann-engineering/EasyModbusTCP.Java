@@ -1,3 +1,6 @@
+<b>
+This project has been discontinued and is no longer maintained</b><br><br>
+
 Modbus TCP, Modbus UDP and Modbus RTU client/server library and Simulators for JAVA
 
 Suitable for data exchange between JAVA-Applications and PLCs like Schneider-electric; Siemens S7; Wago; Bosch-Rexroth; CoDeSys Devices and many more.
