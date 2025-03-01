@@ -34,7 +34,8 @@ import gnu.io.SerialPort;
 
 
      /**
-     * @author Stefan Ro√ümann
+      *
+     * @author Stefan Roﬂmann
      */
 public class ModbusClient 
 {
@@ -153,160 +154,163 @@ public class ModbusClient
         * @param        registers   16 Bit Registers
         * @return       32 bit real value
         */
-    public static float ConvertRegistersToFloat(int[] registers) throws IllegalArgumentException
-    {
-        if (registers.length != 2)
+        public static float ConvertRegistersToFloat(int[] registers) throws IllegalArgumentException {
+            if (registers.length != 2) {
+                throw new IllegalArgumentException("Input Array length invalid");
+            } else {
+                int highRegister = registers[1];
+                int lowRegister = registers[0];
+                byte[] highRegisterBytes = toByteArray(highRegister);
+                byte[] lowRegisterBytes = toByteArray(lowRegister);
+                byte[] floatBytes = new byte[]{highRegisterBytes[1], highRegisterBytes[0], lowRegisterBytes[1], lowRegisterBytes[0]};
+                return ByteBuffer.wrap(floatBytes).getFloat();
+            }
+        }
+
+    public static double ConvertRegistersToDoublePrecisionFloat(int[] registers) throws IllegalArgumentException {
+        if (registers.length != 4) {
             throw new IllegalArgumentException("Input Array length invalid");
-        int highRegister = registers[1];
-        int lowRegister = registers[0];
-        byte[] highRegisterBytes = toByteArray(highRegister);
-        byte[] lowRegisterBytes = toByteArray(lowRegister);
-        byte[] floatBytes = {
-                                highRegisterBytes[1],
-                                highRegisterBytes[0],
-                                lowRegisterBytes[1],
-                                lowRegisterBytes[0]
-                            };
-        return ByteBuffer.wrap(floatBytes).getFloat();
-    }  
-        /**
-        * Convert two 16 Bit Registers to 32 Bit real value
-        * @param        registers   16 Bit Registers
-        * @param        registerOrder    High Register first or low Register first
-        * @return       32 bit real value
-        */
-    public static float ConvertRegistersToFloat(int[] registers, RegisterOrder registerOrder) throws IllegalArgumentException
-    {
-        int [] swappedRegisters = {registers[0],registers[1]};
-        if (registerOrder == RegisterOrder.HighLow) 
-            swappedRegisters = new int[] {registers[1],registers[0]};
+        } else {
+            byte[] highRegisterBytes = toByteArray(registers[3]);
+            byte[] highLowRegisterBytes = toByteArray(registers[2]);
+            byte[] lowHighRegisterBytes = toByteArray(registers[1]);
+            byte[] lowRegisterBytes = toByteArray(registers[0]);
+            byte[] doubleBytes = new byte[]{highRegisterBytes[1], highRegisterBytes[0], highLowRegisterBytes[1], highLowRegisterBytes[0], lowHighRegisterBytes[1], lowHighRegisterBytes[0], lowRegisterBytes[1], lowRegisterBytes[0]};
+            return ByteBuffer.wrap(doubleBytes).getDouble();
+        }
+    }
+
+    public static double ConvertRegistersToDoublePrecisionFloat(int[] registers, ModbusClient.RegisterOrder registerOrder) throws IllegalArgumentException {
+        if (registers.length != 4) {
+            throw new IllegalArgumentException("Input Array length invalid");
+        } else {
+            int[] swappedRegisters = new int[]{registers[0], registers[1], registers[2], registers[3]};
+            if (registerOrder == ModbusClient.RegisterOrder.HighLow) {
+                swappedRegisters = new int[]{registers[3], registers[2], registers[1], registers[0]};
+            }
+
+            return ConvertRegistersToDoublePrecisionFloat(swappedRegisters);
+        }
+    }
+
+    public static float ConvertRegistersToFloat(int[] registers, ModbusClient.RegisterOrder registerOrder) throws IllegalArgumentException {
+        int[] swappedRegisters = new int[]{registers[0], registers[1]};
+        if (registerOrder == ModbusClient.RegisterOrder.HighLow) {
+            swappedRegisters = new int[]{registers[1], registers[0]};
+        }
+
         return ConvertRegistersToFloat(swappedRegisters);
     }
-    
-        /**
-        * Convert two 16 Bit Registers to 32 Bit long value
-        * @param        registers   16 Bit Registers
-        * @return       32 bit value
-        */
-    public static int ConvertRegistersToDouble(int[] registers) throws IllegalArgumentException
-    {
-        if (registers.length != 2)
+
+    public static long ConvertRegistersToLong(int[] registers) throws IllegalArgumentException {
+        if (registers.length != 4) {
             throw new IllegalArgumentException("Input Array length invalid");
-        int highRegister = registers[1];
-        int lowRegister = registers[0];
-        byte[] highRegisterBytes = toByteArray(highRegister);
-        byte[] lowRegisterBytes = toByteArray(lowRegister);
-        byte[] doubleBytes = {
-                                highRegisterBytes[1],
-                                highRegisterBytes[0],
-                                lowRegisterBytes[1],
-                                lowRegisterBytes[0]
-                            };
-        return ByteBuffer.wrap(doubleBytes).getInt();
+        } else {
+            byte[] highRegisterBytes = toByteArray(registers[3]);
+            byte[] highLowRegisterBytes = toByteArray(registers[2]);
+            byte[] lowHighRegisterBytes = toByteArray(registers[1]);
+            byte[] lowRegisterBytes = toByteArray(registers[0]);
+            byte[] longBytes = new byte[]{highRegisterBytes[1], highRegisterBytes[0], highLowRegisterBytes[1], highLowRegisterBytes[0], lowHighRegisterBytes[1], lowHighRegisterBytes[0], lowRegisterBytes[1], lowRegisterBytes[0]};
+            return ByteBuffer.wrap(longBytes).getLong();
+        }
     }
-    
-        /**
-        * Convert two 16 Bit Registers to 32 Bit long value
-        * @param        registers   16 Bit Registers
-        * @param        registerOrder    High Register first or low Register first
-        * @return       32 bit value
-        */
-    public static int ConvertRegistersToDouble(int[] registers, RegisterOrder registerOrder) throws IllegalArgumentException
-    {
-        int[] swappedRegisters = { registers[0], registers[1] };
-        if (registerOrder == RegisterOrder.HighLow)
-            swappedRegisters = new int[] { registers[1], registers[0] };
+
+    public static long ConvertRegistersToLong(int[] registers, ModbusClient.RegisterOrder registerOrder) throws IllegalArgumentException {
+        if (registers.length != 4) {
+            throw new IllegalArgumentException("Input Array length invalid");
+        } else {
+            int[] swappedRegisters = new int[]{registers[0], registers[1], registers[2], registers[3]};
+            if (registerOrder == ModbusClient.RegisterOrder.HighLow) {
+                swappedRegisters = new int[]{registers[3], registers[2], registers[1], registers[0]};
+            }
+
+            return ConvertRegistersToLong(swappedRegisters);
+        }
+    }
+
+    public static int ConvertRegistersToDouble(int[] registers) throws IllegalArgumentException {
+        if (registers.length != 2) {
+            throw new IllegalArgumentException("Input Array length invalid");
+        } else {
+            int highRegister = registers[1];
+            int lowRegister = registers[0];
+            byte[] highRegisterBytes = toByteArray(highRegister);
+            byte[] lowRegisterBytes = toByteArray(lowRegister);
+            byte[] doubleBytes = new byte[]{highRegisterBytes[1], highRegisterBytes[0], lowRegisterBytes[1], lowRegisterBytes[0]};
+            return ByteBuffer.wrap(doubleBytes).getInt();
+        }
+    }
+
+    public static int ConvertRegistersToDouble(int[] registers, ModbusClient.RegisterOrder registerOrder) throws IllegalArgumentException {
+        int[] swappedRegisters = new int[]{registers[0], registers[1]};
+        if (registerOrder == ModbusClient.RegisterOrder.HighLow) {
+            swappedRegisters = new int[]{registers[1], registers[0]};
+        }
+
         return ConvertRegistersToDouble(swappedRegisters);
     }
-    
-        /**
-        * Convert 32 Bit real Value to two 16 Bit Value to send as Modbus Registers
-        * @param        floatValue      real to be converted
-        * @return       16 Bit Register values
-        */
-    public static int[] ConvertFloatToTwoRegisters(float floatValue)
-    {
+
+    public static int[] ConvertFloatToTwoRegisters(float floatValue) {
         byte[] floatBytes = toByteArray(floatValue);
-        byte[] highRegisterBytes = 
-        {
-        		0,0,
-            floatBytes[0],
-            floatBytes[1],
-
-        };
-        byte[] lowRegisterBytes = 
-        {
-            0,0,
-            floatBytes[2],
-            floatBytes[3],
-
-        };
-        int[] returnValue =
-        {
-        		ByteBuffer.wrap(lowRegisterBytes).getInt(),
-        		ByteBuffer.wrap(highRegisterBytes).getInt()
-        };
+        byte[] highRegisterBytes = new byte[]{0, 0, floatBytes[0], floatBytes[1]};
+        byte[] lowRegisterBytes = new byte[]{0, 0, floatBytes[2], floatBytes[3]};
+        int[] returnValue = new int[]{ByteBuffer.wrap(lowRegisterBytes).getInt(), ByteBuffer.wrap(highRegisterBytes).getInt()};
         return returnValue;
     }
-    
-        /**
-        * Convert 32 Bit real Value to two 16 Bit Value to send as Modbus Registers
-        * @param        floatValue      real to be converted
-        * @param        registerOrder    High Register first or low Register first
-        * @return       16 Bit Register values
-        */
-    public static int[] ConvertFloatToTwoRegisters(float floatValue, RegisterOrder registerOrder)
-    {
+
+    public static int[] ConvertFloatToTwoRegisters(float floatValue, ModbusClient.RegisterOrder registerOrder) {
         int[] registerValues = ConvertFloatToTwoRegisters(floatValue);
         int[] returnValue = registerValues;
-        if (registerOrder == RegisterOrder.HighLow)
-            returnValue = new int[] { registerValues[1], registerValues[0] };
+        if (registerOrder == ModbusClient.RegisterOrder.HighLow) {
+            returnValue = new int[]{registerValues[1], registerValues[0]};
+        }
+
         return returnValue;
     }
-    
-        /**
-        * Convert 32 Bit Value to two 16 Bit Value to send as Modbus Registers
-        * @param        doubleValue      Value to be converted
-        * @return       16 Bit Register values
-        */
-    public static int[] ConvertDoubleToTwoRegisters(int doubleValue)
-    {
+
+    public static int[] ConvertDoubleToTwoRegisters(int doubleValue) {
         byte[] doubleBytes = toByteArrayDouble(doubleValue);
-        byte[] highRegisterBytes = 
-        {
-        		0,0,
-            doubleBytes[0],
-            doubleBytes[1],
-
-        };
-        byte[] lowRegisterBytes = 
-        {
-            0,0,
-            doubleBytes[2],
-            doubleBytes[3],
-
-        };
-        int[] returnValue =
-        {
-        		ByteBuffer.wrap(lowRegisterBytes).getInt(),
-        		ByteBuffer.wrap(highRegisterBytes).getInt()
-        };
+        byte[] highRegisterBytes = new byte[]{0, 0, doubleBytes[0], doubleBytes[1]};
+        byte[] lowRegisterBytes = new byte[]{0, 0, doubleBytes[2], doubleBytes[3]};
+        int[] returnValue = new int[]{ByteBuffer.wrap(lowRegisterBytes).getInt(), ByteBuffer.wrap(highRegisterBytes).getInt()};
         return returnValue;
     }
-    
-       	/**
-        * Convert 32 Bit Value to two 16 Bit Value to send as Modbus Registers
-        * @param        doubleValue      Value to be converted
-        * @param        registerOrder    High Register first or low Register first
-        * @return       16 Bit Register values
-        */
-    public static int[] ConvertDoubleToTwoRegisters(int doubleValue, RegisterOrder registerOrder)
-    {
-        int[] registerValues = ConvertFloatToTwoRegisters(doubleValue);
+
+    public static int[] ConvertDoubleToTwoRegisters(int doubleValue, ModbusClient.RegisterOrder registerOrder) {
+        int[] registerValues = ConvertFloatToTwoRegisters((float)doubleValue);
         int[] returnValue = registerValues;
-        if (registerOrder == RegisterOrder.HighLow)
-            returnValue = new int[] { registerValues[1], registerValues[0] };
+        if (registerOrder == ModbusClient.RegisterOrder.HighLow) {
+            returnValue = new int[]{registerValues[1], registerValues[0]};
+        }
+
         return returnValue;
+    }
+
+    public static String ConvertRegistersToString(int[] registers, int offset, int stringLength) {
+        byte[] result = new byte[stringLength];
+        byte[] registerResult = new byte[2];
+
+        for(int i = 0; i < stringLength / 2; ++i) {
+            registerResult = toByteArray(registers[offset + i]);
+            result[i * 2] = registerResult[0];
+            result[i * 2 + 1] = registerResult[1];
+        }
+
+        return new String(result);
+    }
+
+    public static int[] ConvertStringToRegisters(String stringToConvert) {
+        byte[] array = stringToConvert.getBytes();
+        int[] returnarray = new int[stringToConvert.length() / 2 + stringToConvert.length() % 2];
+
+        for(int i = 0; i < returnarray.length; ++i) {
+            returnarray[i] = array[i * 2];
+            if (i * 2 + 1 < array.length) {
+                returnarray[i] |= array[i * 2 + 1] << 8;
+            }
+        }
+
+        return returnarray;
     }
 
     
@@ -515,7 +519,150 @@ public class ModbusClient
 		
 		return (response);
 	}
-	
+
+    /**
+     * Read Discrete Inputs from Server with custom Transaction Id
+     * @param        transactionId      TransactionId to use
+     * @param        startingAddress      Fist Address to read; Shifted by -1
+     * @param        quantity            Number of Inputs to read
+     * @return       Discrete Inputs from Server
+     * @throws de.re.easymodbus.exceptions.ModbusException
+     * @throws UnknownHostException
+     * @throws SocketException
+     */
+    public boolean[] ReadDiscreteInputs(byte[] transactionId, int startingAddress, int quantity) throws de.re.easymodbus.exceptions.ModbusException,
+            UnknownHostException, SocketException, IOException
+    {
+        if (tcpClientSocket == null)
+            throw new de.re.easymodbus.exceptions.ConnectionException("connection Error");
+        if (startingAddress > 65535 | quantity > 2000)
+            throw new IllegalArgumentException("Starting adress must be 0 - 65535; quantity must be 0 - 2000");
+        boolean[] response = null;
+        this.transactionIdentifier = transactionId;
+        this.protocolIdentifier = toByteArray(0x0000);
+        this.length = toByteArray(0x0006);
+        this.functionCode = 0x02;
+        this.startingAddress = toByteArray(startingAddress);
+        this.quantity = toByteArray(quantity);
+        byte[] data = new byte[]
+                {
+                        this.transactionIdentifier[1],
+                        this.transactionIdentifier[0],
+                        this.protocolIdentifier[1],
+                        this.protocolIdentifier[0],
+                        this.length[1],
+                        this.length[0],
+                        this.unitIdentifier,
+                        this.functionCode,
+                        this.startingAddress[1],
+                        this.startingAddress[0],
+                        this.quantity[1],
+                        this.quantity[0],
+                        this.crc[0],
+                        this.crc[1]
+                };
+        if (this.serialflag)
+        {
+            crc = calculateCRC(data, 6, 6);
+            data[data.length -2] = crc[0];
+            data[data.length -1] = crc[1];
+        }
+        byte[] serialdata =null;
+        if (serialflag)
+        {
+
+            out.write(data,6,8);
+            byte receivedUnitIdentifier = (byte)0xFF;
+            int len = -1;
+            byte[] serialBuffer = new byte[256];
+            serialdata = new byte[256];
+            int expectedlength = 5+quantity/8+1;
+            if (quantity % 8 == 0)
+                expectedlength = 5+quantity/8;
+            int currentLength = 0;
+            while (currentLength < expectedlength)
+            {
+                len = -1;
+
+                while (( len = this.in.read(serialBuffer)) <=0);
+
+                for (int i = 0; i < len; i++)
+                {
+                    serialdata[currentLength] = serialBuffer[i];
+                    currentLength++;
+                }
+            }
+            receivedUnitIdentifier = serialdata[0];
+            if (receivedUnitIdentifier != this.unitIdentifier)
+            {
+                serialdata = new byte[256];
+            }
+        }
+        if (serialdata != null)
+        {
+            data = new byte[262];
+            System.arraycopy(serialdata, 0, data, 6, serialdata.length);
+        }
+
+        if (tcpClientSocket.isConnected() | udpFlag)
+        {
+            if (udpFlag)
+            {
+                InetAddress ipAddress = InetAddress.getByName(this.ipAddress);
+                DatagramPacket sendPacket = new DatagramPacket(data, data.length-2, ipAddress, this.port);
+                DatagramSocket clientSocket = new DatagramSocket();
+                clientSocket.setSoTimeout(500);
+                clientSocket.send(sendPacket);
+                data = new byte[2100];
+                DatagramPacket receivePacket = new DatagramPacket(data, data.length);
+                clientSocket.receive(receivePacket);
+                clientSocket.close();
+                data = receivePacket.getData();
+            }
+            else
+            {
+                outStream.write(data, 0, data.length-2);
+                if (sendDataChangedListener.size() > 0)
+                {
+                    sendData = new byte[data.length-2];
+                    System.arraycopy(data, 0, sendData, 0, data.length-2);
+                    for (SendDataChangedListener hl : sendDataChangedListener)
+                        hl.SendDataChanged();
+                }
+                data = new byte[2100];
+                int numberOfBytes = inStream.read(data, 0, data.length);
+                if (receiveDataChangedListener.size() > 0)
+                {
+                    receiveData = new byte[numberOfBytes];
+                    System.arraycopy(data, 0, receiveData, 0, numberOfBytes);
+                    for (ReceiveDataChangedListener hl : receiveDataChangedListener)
+                        hl.ReceiveDataChanged();
+                }
+            }
+        }
+        if (((int) (data[7] & 0xff)) == 0x82 & ((int) data[8]) == 0x01)
+            throw new de.re.easymodbus.exceptions.FunctionCodeNotSupportedException("Function code not supported by master");
+        if (((int) (data[7] & 0xff)) == 0x82 & ((int) data[8]) == 0x02)
+            throw new de.re.easymodbus.exceptions.StartingAddressInvalidException("Starting adress invalid or starting adress + quantity invalid");
+        if (((int) (data[7] & 0xff)) == 0x82 & ((int) data[8]) == 0x03)
+            throw new de.re.easymodbus.exceptions.QuantityInvalidException("Quantity invalid");
+        if (((int) (data[7] & 0xff)) == 0x82 & ((int) data[8]) == 0x04)
+            throw new de.re.easymodbus.exceptions.ModbusException("Error reading");
+        response = new boolean [quantity];
+        for (int i = 0; i < quantity; i++)
+        {
+            int intData = data[9 + i/8];
+            int mask = (int)Math.pow(2, (i%8));
+            intData = ((intData & mask)/mask);
+            if (intData >0)
+                response[i] = true;
+            else
+                response[i] = false;
+        }
+        return (response);
+    }
+
+
         /**
         * Read Coils from Server
         * @param        startingAddress      Fist Address to read; Shifted by -1	
@@ -655,10 +802,151 @@ public class ModbusClient
 				else
 					response[i] = false;
 			}
-			
-		
 		return (response);
 	}
+
+    /**
+     * Read Coils from Server with custom Transaction ID
+     * @param        transactionId      Transaction ID to use
+     * @param        startingAddress      Fist Address to read; Shifted by -1
+     * @param        quantity            Number of Inputs to read
+     * @return       coils from Server
+     * @throws de.re.easymodbus.exceptions.ModbusException
+     * @throws UnknownHostException
+     * @throws SocketException
+     */
+    public boolean[] ReadCoils(byte[] transactionId, int startingAddress, int quantity) throws de.re.easymodbus.exceptions.ModbusException,
+            UnknownHostException, SocketException, IOException
+    {
+        if (tcpClientSocket == null)
+            throw new de.re.easymodbus.exceptions.ConnectionException("connection Error");
+        if (startingAddress > 65535 | quantity > 2000)
+            throw new IllegalArgumentException("Starting adress must be 0 - 65535; quantity must be 0 - 2000");
+        boolean[] response = new boolean[quantity];
+        this.transactionIdentifier = transactionId;
+        this.protocolIdentifier = toByteArray(0x0000);
+        this.length = toByteArray(0x0006);
+        //this.unitIdentifier = 0x00;
+        this.functionCode = 0x01;
+        this.startingAddress = toByteArray(startingAddress);
+        this.quantity = toByteArray(quantity);
+        byte[] data = new byte[]
+                {
+                        this.transactionIdentifier[1],
+                        this.transactionIdentifier[0],
+                        this.protocolIdentifier[1],
+                        this.protocolIdentifier[0],
+                        this.length[1],
+                        this.length[0],
+                        this.unitIdentifier,
+                        this.functionCode,
+                        this.startingAddress[1],
+                        this.startingAddress[0],
+                        this.quantity[1],
+                        this.quantity[0],
+                        this.crc[0],
+                        this.crc[1]
+                };
+        if (this.serialflag)
+        {
+            crc = calculateCRC(data, 6, 6);
+            data[data.length -2] = crc[0];
+            data[data.length -1] = crc[1];
+        }
+        byte[] serialdata =null;
+        if (serialflag)
+        {
+
+            out.write(data,6,8);
+            byte receivedUnitIdentifier = (byte)0xFF;
+            int len = -1;
+            byte[] serialBuffer = new byte[256];
+            serialdata = new byte[256];
+            int expectedlength = 5+quantity/8+1;
+            if (quantity % 8 == 0)
+                expectedlength = 5+quantity/8;
+            int currentLength = 0;
+
+            while ((currentLength < expectedlength))
+            {
+                len = -1;
+
+                while (( len = this.in.read(serialBuffer)) <=0);
+
+                for (int i = 0; i < len; i++)
+                {
+                    serialdata[currentLength] = serialBuffer[i];
+                    currentLength++;
+                }
+            }
+
+            receivedUnitIdentifier = serialdata[0];
+            if (receivedUnitIdentifier != this.unitIdentifier)
+            {
+                serialdata = new byte[256];
+            }
+        }
+        if (serialdata != null)
+        {
+            data = new byte[262];
+            System.arraycopy(serialdata, 0, data, 6, serialdata.length);
+        }
+        if (tcpClientSocket.isConnected() | udpFlag)
+        {
+            if (udpFlag)
+            {
+                InetAddress ipAddress = InetAddress.getByName(this.ipAddress);
+                DatagramPacket sendPacket = new DatagramPacket(data, data.length, ipAddress, this.port);
+                DatagramSocket clientSocket = new DatagramSocket();
+                clientSocket.setSoTimeout(500);
+                clientSocket.send(sendPacket);
+                data = new byte[2100];
+                DatagramPacket receivePacket = new DatagramPacket(data, data.length);
+                clientSocket.receive(receivePacket);
+                clientSocket.close();
+                data = receivePacket.getData();
+            }
+            else
+            {
+                outStream.write(data, 0, data.length-2);
+                if (sendDataChangedListener.size() > 0)
+                {
+                    sendData = new byte[data.length-2];
+                    System.arraycopy(data, 0, sendData, 0, data.length-2);
+                    for (SendDataChangedListener hl : sendDataChangedListener)
+                        hl.SendDataChanged();
+                }
+                data = new byte[2100];
+                int numberOfBytes = inStream.read(data, 0, data.length);
+                if (receiveDataChangedListener.size() > 0)
+                {
+                    receiveData = new byte[numberOfBytes];
+                    System.arraycopy(data, 0, receiveData, 0, numberOfBytes);
+                    for (ReceiveDataChangedListener hl : receiveDataChangedListener)
+                        hl.ReceiveDataChanged();
+                }
+            }
+        }
+        if (((int) (data[7] & 0xff)) == 0x81 & ((int) data[8]) == 0x01)
+            throw new de.re.easymodbus.exceptions.FunctionCodeNotSupportedException("Function code not supported by master");
+        if (((int) (data[7] & 0xff)) == 0x81 & ((int) data[8]) == 0x02)
+            throw new de.re.easymodbus.exceptions.StartingAddressInvalidException("Starting adress invalid or starting adress + quantity invalid");
+        if (((int) (data[7] & 0xff)) == 0x81 & ((int) data[8]) == 0x03)
+            throw new de.re.easymodbus.exceptions.QuantityInvalidException("Quantity invalid");
+        if (((int) (data[7] & 0xff)) == 0x81 & ((int) data[8]) == 0x04)
+            throw new de.re.easymodbus.exceptions.ModbusException("Error reading");
+        for (int i = 0; i < quantity; i++)
+        {
+            int intData = (int) data[9 + i/8];
+            int mask = (int)Math.pow(2, (i%8));
+            intData = ((intData & mask)/mask);
+            if (intData >0)
+                response[i] = true;
+            else
+                response[i] = false;
+        }
+        return (response);
+    }
         
         /**
         * Read Holding Registers from Server
@@ -810,7 +1098,159 @@ public class ModbusClient
 		
 		return (response);
 	}
-	
+
+    /**
+     * Read Holding Registers from Server with custom Transaction ID
+     * @param        transactionId          Transaction Id to use
+     * @param        startingAddress      Fist Address to read; Shifted by -1
+     * @param        quantity            Number of Inputs to read
+     * @return       Holding Registers from Server
+     * @throws de.re.easymodbus.exceptions.ModbusException
+     * @throws UnknownHostException
+     * @throws SocketException
+     */
+    public int[] ReadHoldingRegisters(byte [] transactionId, int startingAddress, int quantity) throws de.re.easymodbus.exceptions.ModbusException,
+            UnknownHostException, SocketException, IOException
+    {
+        if (tcpClientSocket == null)
+            throw new de.re.easymodbus.exceptions.ConnectionException("connection Error");
+        if (startingAddress > 65535 | quantity > 125)
+            throw new IllegalArgumentException("Starting adress must be 0 - 65535; quantity must be 0 - 125");
+        int[] response = new int[quantity];
+        this.transactionIdentifier = transactionId;
+        this.protocolIdentifier = toByteArray(0x0000);
+        this.length = toByteArray(0x0006);
+        //serialdata = this.unitIdentifier;
+        this.functionCode = 0x03;
+        this.startingAddress = toByteArray(startingAddress);
+        this.quantity = toByteArray(quantity);
+
+        byte[] data = new byte[]
+                {
+                        this.transactionIdentifier[1],
+                        this.transactionIdentifier[0],
+                        this.protocolIdentifier[1],
+                        this.protocolIdentifier[0],
+                        this.length[1],
+                        this.length[0],
+                        this.unitIdentifier,
+                        this.functionCode,
+                        this.startingAddress[1],
+                        this.startingAddress[0],
+                        this.quantity[1],
+                        this.quantity[0],
+                        this.crc[0],
+                        this.crc[1]
+                };
+
+        if (this.serialflag)
+        {
+            crc = calculateCRC(data, 6, 6);
+            data[data.length -2] = crc[0];
+            data[data.length -1] = crc[1];
+        }
+        byte[] serialdata =null;
+        if (serialflag)
+        {
+            out.write(data,6,8);
+            byte receivedUnitIdentifier = (byte)0xFF;
+            int len = -1;
+            byte[] serialBuffer = new byte[256];
+            serialdata = new byte[256];
+            int expectedlength = 5+2*quantity;
+            int currentLength = 0;
+            while (currentLength < expectedlength)
+            {
+                len = -1;
+
+                while (( len = this.in.read(serialBuffer)) <=0);
+
+                for (int i = 0; i < len; i++)
+                {
+                    serialdata[currentLength] = serialBuffer[i];
+                    currentLength++;
+                }
+            }
+
+            receivedUnitIdentifier = serialdata[0];
+            if (receivedUnitIdentifier != this.unitIdentifier)
+            {
+                data = new byte[256];
+            }
+            if (serialdata != null)
+            {
+                data = new byte[262];
+                System.arraycopy(serialdata, 0, data, 6, serialdata.length);
+            }
+            for (int i = 0; i < quantity; i++)
+            {
+                byte[] bytes = new byte[2];
+                bytes[0] = data[3+i*2];
+                bytes[1] = data[3+i*2+1];
+                ByteBuffer byteBuffer = ByteBuffer.wrap(bytes);
+                response[i] = byteBuffer.getShort();
+            }
+        }
+
+
+        if (tcpClientSocket.isConnected() | udpFlag)
+        {
+            if (udpFlag)
+            {
+                InetAddress ipAddress = InetAddress.getByName(this.ipAddress);
+                DatagramPacket sendPacket = new DatagramPacket(data, data.length, ipAddress, this.port);
+                DatagramSocket clientSocket = new DatagramSocket();
+                clientSocket.setSoTimeout(500);
+                clientSocket.send(sendPacket);
+                data = new byte[2100];
+                DatagramPacket receivePacket = new DatagramPacket(data, data.length);
+                clientSocket.receive(receivePacket);
+                clientSocket.close();
+                data = receivePacket.getData();
+            }
+            else
+            {
+                outStream.write(data, 0, data.length-2);
+                if (sendDataChangedListener.size() > 0)
+                {
+                    sendData = new byte[data.length-2];
+                    System.arraycopy(data, 0, sendData, 0, data.length-2);
+                    for (SendDataChangedListener hl : sendDataChangedListener)
+                        hl.SendDataChanged();
+                }
+                data = new byte[2100];
+                int numberOfBytes = inStream.read(data, 0, data.length);
+                if (receiveDataChangedListener.size() > 0)
+                {
+                    receiveData = new byte[numberOfBytes];
+                    System.arraycopy(data, 0, receiveData, 0, numberOfBytes);
+                    for (ReceiveDataChangedListener hl : receiveDataChangedListener)
+                        hl.ReceiveDataChanged();
+                }
+            }
+        }
+        if (((int) data[7]) == 0x83 & ((int) data[8]) == 0x01)
+            throw new de.re.easymodbus.exceptions.FunctionCodeNotSupportedException("Function code not supported by master");
+        if (((int) data[7]) == 0x83 & ((int) data[8]) == 0x02)
+            throw new de.re.easymodbus.exceptions.StartingAddressInvalidException("Starting adress invalid or starting adress + quantity invalid");
+        if (((int) data[7]) == 0x83 & ((int) data[8]) == 0x03)
+            throw new de.re.easymodbus.exceptions.QuantityInvalidException("Quantity invalid");
+        if (((int) data[7]) == 0x83 & ((int) data[8]) == 0x04)
+            throw new de.re.easymodbus.exceptions.ModbusException("Error reading");
+        for (int i = 0; i < quantity; i++)
+        {
+            byte[] bytes = new byte[2];
+            bytes[0] = data[9+i*2];
+            bytes[1] = data[9+i*2+1];
+            ByteBuffer byteBuffer = ByteBuffer.wrap(bytes);
+
+            response[i] = byteBuffer.getShort();
+        }
+
+
+        return (response);
+    }
+
 	/**
         * Read Input Registers from Server
         * @param        startingAddress      Fist Address to read; Shifted by -1	
@@ -958,6 +1398,155 @@ public class ModbusClient
 		}
 		return (response);
 	}
+
+    /**
+     * Read Input Registers from Server with custom transaction Id
+     * @param        transactionId         Transaction Id to use
+     * @param        startingAddress      Fist Address to read; Shifted by -1
+     * @param        quantity            Number of Inputs to read
+     * @return       Input Registers from Server
+     * @throws de.re.easymodbus.exceptions.ModbusException
+     * @throws UnknownHostException
+     * @throws SocketException
+     */
+    public int[] ReadInputRegisters(byte[] transactionId,int startingAddress, int quantity) throws de.re.easymodbus.exceptions.ModbusException,
+            UnknownHostException, SocketException, IOException
+    {
+        if (tcpClientSocket == null)
+            throw new de.re.easymodbus.exceptions.ConnectionException("connection Error");
+        if (startingAddress > 65535 | quantity > 125)
+            throw new IllegalArgumentException("Starting adress must be 0 - 65535; quantity must be 0 - 125");
+        int[] response = new int[quantity];
+        this.transactionIdentifier = transactionId;
+        this.protocolIdentifier = toByteArray(0x0000);
+        this.length = toByteArray(0x0006);
+        //this.unitIdentifier = 0x00;
+        this.functionCode = 0x04;
+        this.startingAddress = toByteArray(startingAddress);
+        this.quantity = toByteArray(quantity);
+        byte[] data = new byte[]
+                {
+                        this.transactionIdentifier[1],
+                        this.transactionIdentifier[0],
+                        this.protocolIdentifier[1],
+                        this.protocolIdentifier[0],
+                        this.length[1],
+                        this.length[0],
+                        this.unitIdentifier,
+                        this.functionCode,
+                        this.startingAddress[1],
+                        this.startingAddress[0],
+                        this.quantity[1],
+                        this.quantity[0],
+                        this.crc[0],
+                        this.crc[1]
+                };
+        if (this.serialflag)
+        {
+            crc = calculateCRC(data, 6, 6);
+            data[data.length -2] = crc[0];
+            data[data.length -1] = crc[1];
+        }
+        byte[] serialdata =null;
+        if (serialflag)
+        {
+            out.write(data,6,8);
+            byte receivedUnitIdentifier = (byte)0xFF;
+            int len = -1;
+            byte[] serialBuffer = new byte[256];
+            serialdata = new byte[256];
+            int expectedlength = 5+2*quantity;
+            int currentLength = 0;
+
+            while (currentLength < expectedlength)
+            {
+                len = -1;
+
+                while (( len = this.in.read(serialBuffer)) <=0);
+
+                for (int i = 0; i < len; i++)
+                {
+                    serialdata[currentLength] = serialBuffer[i];
+                    currentLength++;
+                }
+            }
+
+
+            receivedUnitIdentifier = serialdata[0];
+            if (receivedUnitIdentifier != this.unitIdentifier)
+            {
+                data = new byte[256];
+            }
+            if (serialdata != null)
+            {
+                data = new byte[262];
+                System.arraycopy(serialdata, 0, data, 6, serialdata.length);
+            }
+            for (int i = 0; i < quantity; i++)
+            {
+                byte[] bytes = new byte[2];
+                bytes[0] = data[3+i*2];
+                bytes[1] = data[3+i*2+1];
+                ByteBuffer byteBuffer = ByteBuffer.wrap(bytes);
+                response[i] = byteBuffer.getShort();
+            }
+        }
+
+        if (tcpClientSocket.isConnected() | udpFlag)
+        {
+            if (udpFlag)
+            {
+                InetAddress ipAddress = InetAddress.getByName(this.ipAddress);
+                DatagramPacket sendPacket = new DatagramPacket(data, data.length, ipAddress, this.port);
+                DatagramSocket clientSocket = new DatagramSocket();
+                clientSocket.setSoTimeout(500);
+                clientSocket.send(sendPacket);
+                data = new byte[2100];
+                DatagramPacket receivePacket = new DatagramPacket(data, data.length);
+                clientSocket.receive(receivePacket);
+                clientSocket.close();
+                data = receivePacket.getData();
+            }
+            else
+            {
+                outStream.write(data, 0, data.length-2);
+                if (sendDataChangedListener.size() > 0)
+                {
+                    sendData = new byte[data.length-2];
+                    System.arraycopy(data, 0, sendData, 0, data.length-2);
+                    for (SendDataChangedListener hl : sendDataChangedListener)
+                        hl.SendDataChanged();
+                }
+                data = new byte[2100];
+                int numberOfBytes = inStream.read(data, 0, data.length);
+                if (receiveDataChangedListener.size() > 0)
+                {
+                    receiveData = new byte[numberOfBytes];
+                    System.arraycopy(data, 0, receiveData, 0, numberOfBytes);
+                    for (ReceiveDataChangedListener hl : receiveDataChangedListener)
+                        hl.ReceiveDataChanged();
+                }
+            }
+            if (((int) (data[7] & 0xff)) == 0x84 & ((int) data[8]) == 0x01)
+                throw new de.re.easymodbus.exceptions.FunctionCodeNotSupportedException("Function code not supported by master");
+            if (((int) (data[7] & 0xff)) == 0x84 & ((int) data[8]) == 0x02)
+                throw new de.re.easymodbus.exceptions.StartingAddressInvalidException("Starting adress invalid or starting adress + quantity invalid");
+            if (((int) (data[7] & 0xff)) == 0x84 & ((int) data[8]) == 0x03)
+                throw new de.re.easymodbus.exceptions.QuantityInvalidException("Quantity invalid");
+            if (((int) (data[7] & 0xff)) == 0x84 & ((int) data[8]) == 0x04)
+                throw new de.re.easymodbus.exceptions.ModbusException("Error reading");
+            for (int i = 0; i < quantity; i++)
+            {
+                byte[] bytes = new byte[2];
+                bytes[0] = (byte) data[9+i*2];
+                bytes[1] = (byte) data[9+i*2+1];
+                ByteBuffer byteBuffer = ByteBuffer.wrap(bytes);
+                response[i] = byteBuffer.getShort();
+            }
+
+        }
+        return (response);
+    }
 	
         /**
         * Write Single Coil to Server
